@@ -12,25 +12,36 @@ ASMFLAGS =
 
 LDFLAGS = -n $(NAME).sym -l $(NAME).link
 
-SRCS =	main.asm \
-	mem_layout.asm
+FXFLAGS =
 
-OBJS = $(SRCS:%.asm=src/%.o)
+FX = rgbgfx
+
+SRCS =	src/main.asm \
+	src/mem_layout.asm
+
+IMGS = 	assets/font.png
+
+IMGSFX = $(IMGS:%.png=%.fx)
+
+OBJS = $(SRCS:%.asm=%.o)
 
 all:	$(NAME).gbc
 
 run:	all
 	wine "$(BGB_PATH)" ./$(NAME).gbc
 
-%.o : %.asm
-	$(ASM) $(ASMFLAGS) -o $@ $<
+%.fx : %.png
+	$(FX) $(FXFLAGS) -o $@ $<
 
-$(NAME).gbc:	$(OBJS)
+%.o : %.asm
+	$(ASM) -o $@ $(ASMFLAGS) $<
+
+$(NAME).gbc:	$(IMGSFX) $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS)
 	$(FIX) $(FIXFLAGS) $@
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) $(OBJS) $(IMGSFX)
 
 fclean:	clean
 	$(RM) $(NAME).gbc

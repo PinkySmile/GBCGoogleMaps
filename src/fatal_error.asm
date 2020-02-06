@@ -1,4 +1,11 @@
+onlyGBCtext::
+	db "You need a Gameboy              Color", 127, " to run this."
+
 onlyGBCScreen::
+	call loadTextAsset
+	ld hl, onlyGBCtext
+	ld bc, ONLY_GBC_TEXT_LENGTH
+	call displayText
 	jp fatalError
 
 fatalError::

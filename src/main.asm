@@ -7,8 +7,10 @@ lockup::
 	jr lockup
 
 main::
+	ld sp, $DFFF
 	cp a, CGB_A_INIT
 	jp nz, onlyGBCScreen
 	jp lockup
 
 include "src/fatal_error.asm"
+include "src/utils.asm"

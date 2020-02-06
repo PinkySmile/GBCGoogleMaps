@@ -2,4 +2,6 @@
 *~
 *.gbc
 *.sym
+*.sav
+*.fx
 .idea
