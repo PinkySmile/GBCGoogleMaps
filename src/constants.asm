@@ -1,4 +1,4 @@
-CGB_A_INIT EQU $11 ; A Starting value on a Gameboy Color
+CGB_A_INIT EQU $11 ; Accumulator starting value on a Gameboy Color
 
 ; Sound control
 DISABLE_CHANNELS_REGISTERS EQU $FF26
@@ -24,7 +24,3 @@ LCD_CONTROL EQU $FF40
 ; VRAM
 VRAM_START EQU $8000
 VRAM_BG_START EQU $9800
-
-
-; Text length
-ONLY_GBC_TEXT_LENGTH EQU 51

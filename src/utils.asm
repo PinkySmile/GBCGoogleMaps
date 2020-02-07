@@ -1,9 +1,10 @@
 textAssets: incbin "assets/font.fx"
+textAssetsEnd:
 
 loadTextAsset::
 	reg [LCD_CONTROL], $00
 	ld hl, textAssets
-	ld bc, loadTextAsset - textAssets
+	ld bc, textAssetsEnd - textAssets
 	ld de, VRAM_START
 	call copyMemory
 	ret
@@ -13,6 +14,9 @@ copyMemory::
 	or b
 	or c
 	ret z
+	xor a
+	or c
+	jr z, .loop
 	inc b
 .loop:
 	ld a, [hli]
