@@ -3,19 +3,19 @@ SECTION "rst 38h", ROM0
 	jp fatalError
 
 SECTION "vblank", ROM0
-	reti
+	jp vblank_interrupt
 
 SECTION "hblank", ROM0
-	reti
+	jp hblank_interrupt
 
-SECTION "timer", ROM0 
-	reti
+SECTION "timer", ROM0
+	jp timer_interrupt
 
 SECTION "serial", ROM0
-	reti
+	jp serial_interrupt
 
 SECTION "joypad", ROM0
-	reti
+	jp joypad_interrupt
 
 SECTION "Start", ROM0
 	nop

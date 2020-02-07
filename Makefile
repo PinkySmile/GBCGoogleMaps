@@ -6,7 +6,7 @@ LD = rgblink
 
 FIX = rgbfix
 
-FIXFLAGS = -Cjv -k 01 -l 0x33 -m 0x1f -p 0 -r 00 -t "$(NAME)"
+FIXFLAGS = -Cjsv -k 01 -l 0x33 -m 0x1f -p 0 -r 00 -t "$(NAME)"
 
 ASMFLAGS =
 
@@ -27,7 +27,7 @@ OBJS = $(SRCS:%.asm=%.o)
 
 all:	$(NAME).gbc
 
-run:	all
+run:	re
 	wine "$(BGB_PATH)" ./$(NAME).gbc
 
 %.fx : %.png
