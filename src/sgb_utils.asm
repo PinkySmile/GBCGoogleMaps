@@ -1,6 +1,9 @@
 ; SGB Opcodes
-MLT_REQ:
-	db $89, $01, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+MLT_REQ_PAR:
+MASK_EN_FREEZE_PAR:
+	db $01
+MASK_EN_CANCEL_PAR:
+	db $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 sendSGBVal::
 	ld [JOYPAD_REGISTER], a
@@ -36,15 +39,15 @@ sendSGBCommand::
 	push af
 	xor a
 	call sendSGBVal
-	ld e, $00
+	ld e, $10
+	pop af
 
 .loop:
-	ld a, [hli]
 	call sendSGBPacketByte
+	ld a, [hli]
 	dec e
 	jr nz, .loop
 
-	ld a, $10
+	ld a, $20
 	call sendSGBVal
-	pop af
 	ret

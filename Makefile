@@ -30,6 +30,9 @@ all:	$(NAME).gbc
 run:	re
 	wine "$(BGB_PATH)" ./$(NAME).gbc
 
+runw:	re
+	"$(BGB_PATH)" ./$(NAME).gbc
+
 %.fx : %.png
 	$(FX) $(FXFLAGS) -o $@ $<
 

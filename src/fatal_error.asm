@@ -1,5 +1,8 @@
 onlyGBCtext::
-	db "You need a Gameboy              Color", TM_CHARACTER, " to run this."
+	db "You need a   ", " ",          "                  "
+	db "Gameboy Color", TM_CHARACTER, " or a             "
+	db "Super Gameboy", TM_CHARACTER, "                  "
+	db "to run this."
 onlyGBCtextEnd:
 
 onlyGBCScreen::
