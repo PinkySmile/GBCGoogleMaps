@@ -13,12 +13,11 @@ testSGB::
 	call sendSGBCommand
 	ld hl, JOYPAD_REGISTER
 	ld b, [hl]
-	ld [hl], %11000000
-	ld [hl], %10100000
 	ld [hl], %11100000
+	ld [hl], %11010000
+	ld [hl], %11110000
 	ld a, [hl]
 	xor b
-	and $0F
 	ret
 
 DMG:
@@ -27,6 +26,7 @@ GBC:
 	reg HARDWARE_TYPE, $01
 	jr run
 SGB:
+	call loadSGBBorder
 	reg HARDWARE_TYPE, $02
 	jr run
 
@@ -37,7 +37,6 @@ main::
 	cp a, CGB_A_INIT
 	jr z, GBC
 	call testSGB
-	or a
 	jr z, DMG
 	jr SGB
 

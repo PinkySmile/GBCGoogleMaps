@@ -1,6 +1,28 @@
 textAssets: incbin "assets/font.fx"
 textAssetsEnd:
 
+random::
+	push hl
+
+	ld a, [RANDOM_REGISTER]
+	ld hl, DIV_REGISTER
+	add a, [hl]
+	ld [RANDOM_REGISTER], a
+
+	pop hl
+	ret
+
+trashVRAM::
+	call waitVBLANK
+	reg LCD_CONTROL, $00
+	ld hl, $9FFF
+.start:
+	call random
+	ld [hl-], a
+	bit 7, h
+	jr nz, .start
+	ret
+
 loadTextAsset::
 	call waitVBLANK
 	reg LCD_CONTROL, $00
