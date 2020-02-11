@@ -3,10 +3,29 @@ include "src/macro.asm"
 
 SECTION "Main", ROM0
 
+; Locks the CPU
+; Params:
+;    None
+; Return:
+;    None
+; Registers:
+;    N/A
 lockup::
 	reg INTERRUPT_ENABLED, $00
 	halt
+	jr lockup
 
+; Tests if the current hardware is SGB
+; Params:
+;    None
+; Return:
+;    a      -> 0 if on DMG. 1 if on SGB.
+;    Flag Z -> 1 if on DMG. 0 if on SGB.
+; Registers:
+;    af -> Not preserved
+;    bc -> Not preserved
+;    de -> Not preserved
+;    hl -> Not preserved
 testSGB::
 	ld a, MLT_REQ
 	ld hl, MLT_REQ_PAR
@@ -20,26 +39,40 @@ testSGB::
 	xor b
 	ret
 
-DMG:
-	jp onlyGBCScreen
-GBC:
-	reg HARDWARE_TYPE, $01
-	jr run
-SGB:
-	call loadSGBBorder
-	reg HARDWARE_TYPE, $02
-	jr run
+; The text displayed when playing on a Gameboy
+onlyGBCtext::
+	db "You need a   ", " ",          "                  "
+	db "Gameboy Color", TM_CHARACTER, " or a             "
+	db "Super Gameboy", TM_CHARACTER, "                  "
+	db "to run this."
+onlyGBCtextEnd:
 
+; Main function
 main::
-	call init
-	ld sp, $E000
+	call init               ; Init
+	ld sp, $E000            ; Init stack
 
-	cp a, CGB_A_INIT
+	cp a, CGB_A_INIT        ; Check if on Gameboy Color
 	jr z, GBC
-	call testSGB
+	call testSGB            ; Check if on SGB
 	jr z, DMG
 	jr SGB
 
+DMG:                            ; We are on monochrome Gameboy
+	ld hl, onlyGBCtext
+	ld bc, onlyGBCtextEnd - onlyGBCtext
+	jp dispError            ; Display error message
+
+GBC:                            ; We are on Gameboy Color
+	reg HARDWARE_TYPE, $01  ; Sets the hardware type register to GBC
+	jr run                  ; Run main program
+
+SGB:                            ; We are on Super Gameboy
+	call loadSGBBorder      ; Load the SGB boarder and display it
+	reg HARDWARE_TYPE, $02  ; Sets the hardware type register to SGB
+	jr run                  ; Run main program
+
+; Runs the main program
 run::
 	jp lockup
 

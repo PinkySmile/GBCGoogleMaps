@@ -1,17 +1,26 @@
-onlyGBCtext::
-	db "You need a   ", " ",          "                  "
-	db "Gameboy Color", TM_CHARACTER, " or a             "
-	db "Super Gameboy", TM_CHARACTER, "                  "
-	db "to run this."
-onlyGBCtextEnd:
-
-onlyGBCScreen::
+; Displays an error message and lock CPU
+; Params:
+;    hl -> Text to display
+;    bc -> Length of the text
+; Return:
+;    None
+; Registers:
+;    N/A
+dispError::
+	; Load text fonts
 	call loadTextAsset
-	ld hl, onlyGBCtext
-	ld bc, onlyGBCtextEnd - onlyGBCtext
+	; Display given text
 	call displayText
+	; Play a sound and lock CPU
 	jp fatalError
 
+; Plays sound and locks CPU
+; Params:
+;    None
+; Return:
+;    None
+; Registers:
+;    N/A
 fatalError::
 	reg DISABLE_CHANNELS_REGISTERS, $80
 	reg CHANNEL2_VOLUME, $00

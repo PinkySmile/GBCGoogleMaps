@@ -1,21 +1,19 @@
-initRAM::
-	ld b, a
-	ld a, [RANDOM_REGISTER]
-	push af
-	ld a, b
-	ld hl, $DFFF
-.loop:
-	ld [hl-], a
-	bit 6, h
-	jr nz, .loop
-	pop af
-	ld [RANDOM_REGISTER], a
-	ret
-
+; Enable interupts and init RAM
+; Params:
+;    None
+; Return:
+;    None
+; Registers:
+;    af -> Preserved
+;    bc -> Not preserved
+;    de -> Not preserved
+;    hl -> Not preserved
 init::
 	ei
 	push af
 	xor a
-	call initRAM
+	ld bc, $2000
+	ld de, $C000
+	call fillMemory
 	pop af
 	ret
