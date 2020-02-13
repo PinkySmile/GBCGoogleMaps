@@ -11,7 +11,8 @@ SECTION "Main", ROM0
 ; Registers:
 ;    N/A
 lockup::
-	reg INTERRUPT_ENABLED, $00
+	xor a
+	ld [INTERRUPT_ENABLED], a
 	halt
 	jr lockup
 

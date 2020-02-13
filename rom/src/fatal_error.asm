@@ -23,9 +23,9 @@ dispError::
 ;    N/A
 fatalError::
 	reg DISABLE_CHANNELS_REGISTERS, $80
-	reg CHANNEL2_VOLUME, $00
-	reg CHANNEL3_ON_OFF, $00
-	reg CHANNEL4_VOLUME, $00
+	reset CHANNEL2_VOLUME
+	reset CHANNEL3_ON_OFF
+	reset CHANNEL4_VOLUME
 	ld c, $03
 	ld d, $00
 .loop:

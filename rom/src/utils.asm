@@ -16,13 +16,18 @@ textAssetsEnd:
 ;    hl -> Not preserved
 uncompress::
 	ld a, [hli]
+
+	ld [de], a
 	inc de
-	inc hl
+	ld [de], a
+	inc de
+
 	dec bc
 	xor a
 	or b
 	or c
 	jr nz, uncompress
+	ret
 
 ; Generates a pseudo random number.
 ; Params:
@@ -57,7 +62,7 @@ random::
 ;    hl -> Not preserved
 trashVRAM::
 	call waitVBLANK
-	reg LCD_CONTROL, $00
+	reset LCD_CONTROL
 	ld hl, $9FFF
 .start:
 	call random
@@ -85,7 +90,7 @@ loadTextAsset::
 
 	call waitVBLANK
 	; Disable LCD
-	reg LCD_CONTROL, $00
+	reset LCD_CONTROL
 	ld hl, textAssets
 	ld bc, textAssetsEnd - textAssets
 	ld de, VRAM_START
@@ -170,7 +175,7 @@ waitVBLANK::
 
 	ld a, [INTERRUPT_ENABLED] ; Save old interrupt enabled
 	push af
-	reg INTERRUPT_REQUEST, $00; Clear old requests
+	reset INTERRUPT_REQUEST; Clear old requests
 	reg INTERRUPT_ENABLED, $01; Enable only VBLANK interrupt
 .loop:
 	halt   ; Wait for interrupt
@@ -191,7 +196,7 @@ waitVBLANK::
 ;    hl -> Not preserved
 displayText::
 	call waitVBLANK
-	reg LCD_CONTROL, $00
+	reset LCD_CONTROL
 	ld de, VRAM_BG_START
 	call copyMemory
 	reg LCD_CONTROL, %10010001

@@ -22,21 +22,8 @@ bool compress(char *path)
     fread(buffer, 1, s.st_size, stream);
     fclose(stream);
 
-    for (int i = 0; i < s.st_size / 2; i++) {
-        char v1 = buffer[i * 2];
-        char v2 = buffer[i * 2 + 1];
-
-        buffer[i] = (
-            (v1 & 0b00000010U) >> 1U |
-            (v1 & 0b00001000U) >> 2U |
-            (v1 & 0b00100000U) >> 3U |
-            (v1 & 0b10000000U) >> 4U |
-            (v2 & 0b00000010U) << 3U |
-            (v2 & 0b00001000U) << 2U |
-            (v2 & 0b00100000U) << 1U |
-            (v2 & 0b10000000U) << 0U
-        );
-    }
+    for (int i = 0; i < s.st_size / 2; i++)
+        buffer[i] = buffer[i * 2];
 
     stream = fopen(path, "w");
     if (!stream)
