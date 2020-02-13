@@ -2,6 +2,28 @@
 textAssets: incbin "assets/font.fx"
 textAssetsEnd:
 
+; Uncompress compressed data
+; Params:
+;    hl -> Pointer to the compressed data
+;    de -> Destination address
+;    bc -> Data size
+; Return:
+;    None
+; Registers:
+;    af -> Not preserved
+;    bc -> Not preserved
+;    de -> Not preserved
+;    hl -> Not preserved
+uncompress::
+	ld a, [hli]
+	inc de
+	inc hl
+	dec bc
+	xor a
+	or b
+	or c
+	jr nz, uncompress
+
 ; Generates a pseudo random number.
 ; Params:
 ;    None
@@ -68,7 +90,7 @@ loadTextAsset::
 	ld bc, textAssetsEnd - textAssets
 	ld de, VRAM_START
 	; Copy text font info VRAM
-	call copyMemory
+	call uncompress
 
 	; Restore registers
 	pop de
@@ -196,6 +218,90 @@ waitFrames::
 	halt
 	jr nz, .loop
 
+
+dispBorderLine::
+	ld [hli], a
+	inc a
+	ld e, 18
+.loop:
+	ld [hli], a
+	dec e
+	jr nz, .loop
+	inc a
+	ld [hli], a
+	inc a
+	ret
+
+; Displays the keyboard
+; Params:
+;    None
+; Return:
+;    None
+; Registers
+;    af -> Preserved
+;    bc -> Preserved
+;    de -> Not preserved
+;    hl -> Preserved
+displayKeyboard::
+	push af
+	push hl
+	push bc
+	ld a, 128
+	ld hl, $9880
+	call dispBorderLine
+	ld e, 32
+	call .inc
+	ld c, 12
+.loop:
+	ld [hli], a
+	inc a
+	push af
+	ld b, 8
+
+.loop2:
+	ld [hl], $00
+	inc hl
+	ld a, e
+	ld [hli], a
+	inc e
+	dec b
+	jr nz, .loop2
+
+	xor a
+	ld [hli], a
+	ld [hli], a
+
+	pop af
+	ld [hli], a
+	dec a
+
+	call .inc
+	dec c
+	jr nz, .loop
+
+	inc a
+	inc a
+	call dispBorderLine
+
+	pop hl
+	pop bc
+	pop af
+	ret
+.inc:
+	inc hl
+	inc hl
+	inc hl
+	inc hl
+	inc hl
+	inc hl
+	inc hl
+	inc hl
+	inc hl
+	inc hl
+	inc hl
+	inc hl
+	ret
+
 ; Opens the window to type text in.
 ; Params:
 ;    a  -> Character which replace typed text (\0 for no covering)
@@ -210,3 +316,7 @@ waitFrames::
 ;    hl -> Not preserved
 typeText::
 	call loadTextAsset
+	call displayKeyboard
+	reg LCD_CONTROL, %10010001
+	ret
+

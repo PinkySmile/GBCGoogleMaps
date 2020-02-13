@@ -64,6 +64,7 @@ DMG:                            ; We are on monochrome Gameboy
 	jp dispError            ; Display error message
 
 GBC:                            ; We are on Gameboy Color
+	call setupGBCPalette    ; Setup palettes
 	reg HARDWARE_TYPE, $01  ; Sets the hardware type register to GBC
 	jr run                  ; Run main program
 
@@ -74,6 +75,7 @@ SGB:                            ; We are on Super Gameboy
 
 ; Runs the main program
 run::
+	call typeText
 	jp lockup
 
 include "src/init.asm"

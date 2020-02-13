@@ -25,7 +25,10 @@ IMGSFX = $(IMGS:%.png=%.fx)
 
 OBJS = $(SRCS:%.asm=%.o)
 
-all:	$(NAME).gbc
+all:	tools/compressor $(NAME).gbc
+
+tools/compressor:
+	$(MAKE) -C tools compressor
 
 run:	re
 	wine "$(BGB_PATH)" ./$(NAME).gbc
@@ -35,6 +38,7 @@ runw:	re
 
 %.fx : %.png
 	$(FX) $(FXFLAGS) -o $@ $<
+	tools/compressor $@
 
 %.o : %.asm
 	$(ASM) -o $@ $(ASMFLAGS) $<
@@ -44,9 +48,11 @@ $(NAME).gbc:	$(IMGSFX) $(OBJS)
 	$(FIX) $(FIXFLAGS) $@
 
 clean:
+	$(MAKE) -C tools clean
 	$(RM) $(OBJS) $(IMGSFX)
 
 fclean:	clean
+	$(MAKE) -C tools fclean
 	$(RM) $(NAME).gbc
 
 re:	fclean all
