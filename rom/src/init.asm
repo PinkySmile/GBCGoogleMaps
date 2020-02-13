@@ -27,7 +27,7 @@ init::
 ;    af -> Not preserved
 ;    bc -> Preserved
 ;    de -> Preserved
-;    hl -> Preserved
+;    hl -> Not preserved
 setupGBCPalette::
 	ld a, $86;
 	ld hl, BGPI
