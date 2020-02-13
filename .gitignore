@@ -6,3 +6,4 @@
 *.fx
 .idea
 tools/compressor
+server/private
