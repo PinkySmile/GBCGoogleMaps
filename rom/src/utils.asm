@@ -176,7 +176,7 @@ waitVBLANK::
 	ld a, [INTERRUPT_ENABLED] ; Save old interrupt enabled
 	push af
 	reset INTERRUPT_REQUEST; Clear old requests
-	reg INTERRUPT_ENABLED, $01; Enable only VBLANK interrupt
+	reg INTERRUPT_ENABLED, VBLANK_INTERRUPT; Enable only VBLANK interrupt
 .loop:
 	halt   ; Wait for interrupt
 	pop af ; Restore old interrupt enabled
@@ -215,7 +215,7 @@ displayText::
 waitFrames::
 	ld hl, FRAME_COUNTER
 	ld [hl], a
-	reg INTERRUPT_ENABLED, $01
+	reg INTERRUPT_ENABLED, VBLANK_INTERRUPT
 	xor a
 .loop:
 	or [hl]
@@ -307,6 +307,13 @@ displayKeyboard::
 	inc hl
 	ret
 
+; Get all pressed keys
+; Params:
+;    None
+; Return:
+;    a -> All the pressed keys
+;       bit 0 ->
+
 ; Opens the window to type text in.
 ; Params:
 ;    a  -> Character which replace typed text (\0 for no covering)
@@ -323,5 +330,8 @@ typeText::
 	call loadTextAsset
 	call displayKeyboard
 	reg LCD_CONTROL, %10010001
+.loop:
+	call waitVBLANK
+
 	ret
 

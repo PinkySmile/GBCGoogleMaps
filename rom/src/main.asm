@@ -11,10 +11,8 @@ SECTION "Main", ROM0
 ; Registers:
 ;    N/A
 lockup::
-	xor a
-	ld [INTERRUPT_ENABLED], a
+	reset INTERRUPT_ENABLED
 	halt
-	jr lockup
 
 ; Tests if the current hardware is SGB
 ; Params:
@@ -76,6 +74,7 @@ SGB:                            ; We are on Super Gameboy
 
 ; Runs the main program
 run::
+	ei
 	call typeText
 	jp lockup
 

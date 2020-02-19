@@ -9,7 +9,6 @@
 ;    de -> Not preserved
 ;    hl -> Not preserved
 init::
-	ei
 	push af
 	xor a
 	ld bc, $2000
