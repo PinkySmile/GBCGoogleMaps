@@ -3,7 +3,7 @@ SECTION "rst 38h", ROM0
 	rst $38
 
 SECTION "vblank", ROM0
-	rst $38
+	ret
 
 SECTION "hblank", ROM0
 	rst $38

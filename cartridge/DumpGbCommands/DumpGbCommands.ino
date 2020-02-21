@@ -49,27 +49,63 @@ unsigned char dpins[] = {
   51
 };
 
-extern byte rom[];
+#include "rom.data"
 
-  unsigned short raw = 0x00;
-  unsigned short oaddr = 0x00;
-  unsigned short addr = 0x00;
-  
-  bool rd = 0;
-  bool cs = 0;
+#define GETADDR (GPIOE->IDR >> 2U)
 
+unsigned short raw = 0x00;
+unsigned short oaddr = 0x00;
+unsigned short addr = 0x00;
+
+bool rd = 0;
+bool cs = 0;
+
+void updateDataBus(HardwareTimer *)
+{
+  rom[0xFE] =  analogRead(A0);
+  rom[0xFF] =  analogRead(A1);
+}
 
 void setup() {
+  Serial.begin(2000000);
+  while (!Serial);
+ /*
+  HardwareTimer *MyTim = new HardwareTimer(TIM3);
+  MyTim->setMode(0, TIMER_OUTPUT_COMPARE);
+  MyTim->setOverflow(60, HERTZ_FORMAT);
+  MyTim->attachInterrupt(0, updateDataBus);
+  MyTim->resume();
+*/
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(D13, INPUT_PULLUP);
   for (int i = 0; i < 16; i++)
     pinMode(epins[i], INPUT);
   for (int i = 0; i < 8; i++)
     pinMode(dpins[i], OUTPUT);
   GPIOD->ODR = 0x00;
+  while (/*true){*/GETADDR != 0x7EE) {
+    GPIOD->ODR = rom[GETADDR];
+  }
 }
 
 void loop() {
+  unsigned add = GETADDR;
 
-  //Serial.println(addr, HEX);
-  
-  GPIOD->ODR = rom[GPIOE->IDR >> 8U];
+  switch (add) {
+  //default:
+  //  GPIOD->ODR = rom[add];
+  //  break;
+  case 0x7FF:
+    int x = analogRead(A1);
+    int y = analogRead(A0);
+    char result = (x < 0x140) | ((x > 0x190) << 1) | ((y < 0x160) << 3) | ((y > 0x190) << 2) | (!digitalRead(D13) << 4);
+
+    Serial.print(x, HEX);
+    Serial.print(" ");
+    Serial.print(y, HEX);
+    Serial.print(" ");
+    Serial.println(result, BIN);
+    GPIOD->ODR = result;
+  }
 }
