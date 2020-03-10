@@ -96,7 +96,7 @@ programStart::
 	dec e
 	jr nz, .loop3
 
-	reg $FF40, %10010001
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
 
 	ld a, [$7EE]
 .start:

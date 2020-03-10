@@ -199,7 +199,7 @@ displayText::
 	reset LCD_CONTROL
 	ld de, VRAM_BG_START
 	call copyMemory
-	reg LCD_CONTROL, %10010001
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
 	ret
 
 ; Wait for VBLANK. Only returns when a VBLANK occurs.
@@ -307,12 +307,105 @@ displayKeyboard::
 	inc hl
 	ret
 
-; Get all pressed keys
+; Get all the pressed keys.
 ; Params:
 ;    None
 ; Return:
+;    (Pressed when bit is 0)
 ;    a -> All the pressed keys
-;       bit 0 ->
+;       bit 0 -> Right
+;       bit 1 -> Left
+;       bit 2 -> Up
+;       bit 3 -> Down
+;       bit 4 -> A
+;       bit 5 -> B
+;       bit 6 -> Select
+;       bit 7 -> Start
+; Registers:
+;    af -> Not preserved
+;    b  -> Not preserved
+;    c  -> Preserved
+;    de -> Preserved
+;    hl -> Not preserved
+getKeys::
+	ld hl, $FF00
+	ld a, %00010000
+	ld [hl], a
+	ld a, [hl]
+	ld a, [hl]
+	ld a, [hl]
+	ld a, [hl]
+	ld a, [hl]
+	and a, $F
+	ld b, a
+	swap b
+
+	ld a, %00100000
+	ld [hl], a
+	ld a, [hl]
+	ld a, [hl]
+	ld a, [hl]
+	ld a, [hl]
+	ld a, [hl]
+	and a, $F
+	or b
+	ret
+
+; Get all the pressed keys but disabled ones.
+; Params:
+;    None
+; Return:
+;    (Pressed when bit is 0)
+;    a -> All the pressed keys
+;       bit 0 -> Right
+;       bit 1 -> Left
+;       bit 2 -> Up
+;       bit 3 -> Down
+;       bit 4 -> A
+;       bit 5 -> B
+;       bit 6 -> Select
+;       bit 7 -> Start
+; Registers:
+;    af -> Not preserved
+;    bc -> Not preserved
+;    de -> Preserved
+;    hl -> Not preserved
+getKeysFiltered::
+	call getKeys
+	ld b, a
+	ld hl, KEYS_DISABLED
+	ld a, [hl]
+	or b
+	ld c, a
+	ld a, b
+	cpl
+	ld [hl], a
+	ld a, c
+	ret
+
+getSelectedLetter::
+	ld hl, OAM_SRC_START
+	ld a, [hli]
+	sub $38
+	rra
+	rra
+	rra
+	and $0F
+	swap a
+	rra
+	ld b, a
+
+	ld a, [hl]
+	sub $10
+	rra
+	rra
+	rra
+	rra
+	and $0F
+
+	or b
+	add $20
+	ret
 
 ; Opens the window to type text in.
 ; Params:
@@ -329,9 +422,113 @@ displayKeyboard::
 typeText::
 	call loadTextAsset
 	call displayKeyboard
-	reg LCD_CONTROL, %10010001
+
+	xor a
+	ld de, OAM_SRC_START
+	ld bc, $A0
+	call fillMemory
+
+	ld hl, OAM_SRC_START
+
+	ld a, $38
+	ld [hli], a
+	ld a, $10
+	ld [hli], a
+	ld a, 127
+	ld [hli], a
+	ld a, %00100000
+	ld [hli], a
+
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
 .loop:
 	call waitVBLANK
+	call getSelectedLetter
+	ld [$9800], a
+	call getKeysFiltered
 
+	ld b, a
+	bit 4, a ; A
+	call z, .a
+
+	ld a, b
+	bit 0, a ; right
+	call z, .right
+
+	ld a, b
+	bit 1, a ; left
+	call z, .left
+
+	ld a, b
+	bit 2, a ; up
+	call z, .up
+
+	ld a, b
+	bit 3, a ; down
+	call z, .down
+
+	ld a, b
+	bit 5, a ; B
+	call z, .b
+
+	ld a, b
+	bit 6, a ; Select
+	call z, .select
+
+	ld a, b
+	bit 7, a ; Start
+	jr nz, .loop
+
+	ret
+.right:
+	ld a, [OAM_SRC_START + 1]
+	cp a, $80
+	jr nz, .rightSkip
+	xor a
+.rightSkip:
+	add a, $10
+	ld [OAM_SRC_START + 1], a
+	ret
+
+.left:
+	ld a, [OAM_SRC_START + 1]
+	cp a, $10
+	jr nz, .leftSkip
+	set 7, a
+.leftSkip:
+	sub a, $10
+	ld [OAM_SRC_START + 1], a
+	ret
+
+.up:
+	ld a, [OAM_SRC_START]
+	cp a, $38
+	jr nz, .upSkip
+	ld a, $98
+.upSkip:
+	sub a, $8
+	ld [OAM_SRC_START], a
+	ret
+
+.down:
+	ld a, [OAM_SRC_START]
+	cp a, $90
+	jr nz, .downSkip
+	ld a, $30
+.downSkip:
+	add a, $8
+	ld [OAM_SRC_START], a
+	ret
+
+.a:
+	ld a, [OAM_SRC_START + 1]
+	add a, $10
+	ld [OAM_SRC_START + 1], a
+	ret
+.b:
+	ld a, [OAM_SRC_START + 1]
+	add a, $10
+	ld [OAM_SRC_START + 1], a
+	ret
+.select:
 	ret
 

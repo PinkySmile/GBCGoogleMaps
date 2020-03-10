@@ -115,21 +115,21 @@ loadSGBBorder::
 	call trashVRAM
 	ld a, CHR_TRN
 	ld hl, CHR_TRN_PAR
-	reg LCD_CONTROL, %10010001
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
 	call sendSGBCommand
 
 	; Send tile data
 	call trashVRAM
 	ld a, PCT_TRN
 	ld hl, PCT_TRN_PAR
-	reg LCD_CONTROL, %10010001
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
 	call sendSGBCommand
 
 	; Send palette data
 	call trashVRAM
 	ld a, PAL_TRN
 	ld hl, PAL_TRN_PAR
-	reg LCD_CONTROL, %10010001
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
 	call sendSGBCommand
 
 	; Enable screen view

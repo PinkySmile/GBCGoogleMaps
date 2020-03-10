@@ -9,16 +9,18 @@
 ;    de -> Preserved
 ;    hl -> Preserved
 vblank_interrupt::
-	push hl
 	push af
+	push hl
 	xor a
 	ld hl, FRAME_COUNTER
 	or [hl]
 	jr z, .skip
 	dec [hl]
 .skip:
-	pop af
+	ld a, OAM_SRC_START / $100
+	call DMA
 	pop hl
+	pop af
 	reti
 
 ; HBLANK interrupt handler
