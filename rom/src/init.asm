@@ -59,5 +59,11 @@ setupGBCPalette::
 	ld [hli], a
 	xor a
 	ld [hl], a
+	ld [hli], a
+
+	ld a, $86;
+	ld [hli], a
+	xor a
+	ld [hl], a
 	ld [hl], a
 	ret
