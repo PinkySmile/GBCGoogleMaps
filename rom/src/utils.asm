@@ -181,7 +181,6 @@ waitVBLANK::
 
 ; Displays text on screen.
 ; Params:
-;    bc -> Length of the text.
 ;    hl -> Pointer to the start of the text.
 ; Return:
 ;    None
@@ -194,9 +193,25 @@ displayText::
 	call waitVBLANK
 	reset LCD_CONTROL
 	ld de, VRAM_BG_START
-	call copyMemory
-	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
-	ret
+.loop:
+	ld a, [hli]
+
+	or a
+	ret z
+
+	cp 10
+	jr z, .newLine
+
+	ld [de], a
+	inc de
+
+	jr .loop
+.newLine:
+	inc de
+	ld a, %11111
+	and e
+	jr nz, .newLine
+	jr .loop
 
 ; Wait for VBLANK. Only returns when a VBLANK occurs.
 ; Params:
@@ -418,8 +433,6 @@ typeText::
 
 	ld hl, $C004 ; Buffer initial value
 	push hl
-
-	call loadTextAsset   ; Load fonts
 	call displayKeyboard ; Display keyboard on screen
 
 	xor a

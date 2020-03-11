@@ -7,7 +7,6 @@
 ;    N/A
 pcAt38Error::
 	ld hl, pc38hText
-	ld bc, pc38hTextEnd - pc38hText
 	jp dispError
 
 ; Displays an error message and lock CPU
@@ -23,6 +22,7 @@ dispError::
 	call loadTextAsset
 	; Display given text
 	call displayText
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
 	; Play a sound and lock CPU
 	jp fatalError
 

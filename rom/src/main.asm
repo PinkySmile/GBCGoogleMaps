@@ -51,25 +51,32 @@ main::
 
 DMG:                            ; We are on monochrome Gameboy
 	ld hl, onlyGBCtext
-	ld bc, onlyGBCtextEnd - onlyGBCtext
 	jp dispError            ; Display error message
 
 GBC:                            ; We are on Gameboy Color
 	call setupGBCPalette    ; Setup palettes
 	reg HARDWARE_TYPE, $01  ; Sets the hardware type register to GBC
-	jr run                  ; Run main program
+	ei
+	jr welcomeScreen        ; Run main program
 
 SGB:                            ; We are on Super Gameboy
 	call loadSGBBorder      ; Load the SGB boarder and display it
 	reg HARDWARE_TYPE, $02  ; Sets the hardware type register to SGB
-	jr run                  ; Run main program
+	ei
+	jr welcomeScreen        ; Run main program
 
 ; Runs the main program
-run::
-	ei
+welcomeScreen::
+	call loadTextAsset
+	ld hl, generalInfos
+	call displayText
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
+	jp lockup
+
+changeSSID::
+
 	xor a
 	call typeText
-	jp lockup
 
 include "src/init.asm"
 include "src/fatal_error.asm"
