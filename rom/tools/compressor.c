@@ -11,7 +11,7 @@
 bool compress(char *path)
 {
     struct stat s;
-    FILE *stream = fopen(path, "r");
+    FILE *stream = fopen(path, "rb");
     char *buffer;
 
     if (stat(path, &s) == -1 || !stream)
@@ -25,7 +25,7 @@ bool compress(char *path)
     for (int i = 0; i < s.st_size / 2; i++)
         buffer[i] = buffer[i * 2];
 
-    stream = fopen(path, "w");
+    stream = fopen(path, "wb");
     if (!stream)
         return perror(path), free(buffer), false;
     fwrite(buffer, 1, s.st_size / 2, stream);
