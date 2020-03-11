@@ -75,6 +75,7 @@ SGB:                            ; We are on Super Gameboy
 ; Runs the main program
 run::
 	ei
+	xor a
 	call typeText
 	jp lockup
 

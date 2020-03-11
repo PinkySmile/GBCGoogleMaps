@@ -410,21 +410,18 @@ getSelectedLetter::
 ; Opens the window to type text in.
 ; Params:
 ;    a  -> Character which replace typed text (\0 for no covering)
-;    hl -> Pointer to a buffer.
-;    bc -> Buffer max size.
 ; Return:
-;    None
+;    [$C004 - $C043] -> The typed text
 ; Registers:
 ;    af -> Preserved
 ;    bc -> Not preserved
 ;    de -> Not preserved
 ;    hl -> Not preserved
 typeText::
-	push hl
-	push bc
+	push af
 
-	ld de, $9021
-	push de
+	ld hl, $C004
+	push hl
 
 	call loadTextAsset
 	call displayKeyboard
@@ -452,31 +449,39 @@ typeText::
 
 	ld b, a
 	bit 4, a ; A
-	call z, .a
+	jr z, .a
+.aEnd:
 
 	ld a, b
 	bit 0, a ; right
-	call z, .right
+	jr z, .right
+.rightEnd:
 
 	ld a, b
 	bit 1, a ; left
-	call z, .left
+	jr z, .left
+.leftEnd:
 
 	ld a, b
 	bit 2, a ; up
-	call z, .up
+	jr z, .up
+.upEnd:
 
 	ld a, b
 	bit 3, a ; down
-	call z, .down
+	jr z, .down
+.downEnd:
 
 	ld a, b
 	bit 5, a ; B
-	call z, .b
+	jr z, .b
+.bEnd:
 
 	ld a, b
 	bit 6, a ; Select
-	call z, .select
+	jr nz, .selectEnd
+	jp .select
+.selectEnd:
 
 	ld a, b
 	bit 7, a ; Start
@@ -491,7 +496,7 @@ typeText::
 .rightSkip:
 	add a, $10
 	ld [OAM_SRC_START + 1], a
-	ret
+	jr .rightEnd
 
 .left:
 	ld a, [OAM_SRC_START + 1]
@@ -501,7 +506,7 @@ typeText::
 .leftSkip:
 	sub a, $10
 	ld [OAM_SRC_START + 1], a
-	ret
+	jr .leftEnd
 
 .up:
 	ld a, [OAM_SRC_START]
@@ -511,7 +516,7 @@ typeText::
 .upSkip:
 	sub a, $8
 	ld [OAM_SRC_START], a
-	ret
+	jr .upEnd
 
 .down:
 	ld a, [OAM_SRC_START]
@@ -521,33 +526,64 @@ typeText::
 .downSkip:
 	add a, $8
 	ld [OAM_SRC_START], a
-	ret
+	jr .downEnd
 
 .a:
-	pop de
-	pop bc
 	pop hl
+	ld a, $41
+	cp l
+	push hl
+	jr z, .aEnd
+
+	push bc
 	call getSelectedLetter
-	dec bc
+	ld b, a
+	ld a, $7F
+	cp b
+	ld a, b
+	pop bc
+	jr z, .b
+
+	pop hl
 	ld [hli], a
+	ld c, a
+	ld de, $9840 - 4
+	ld a, e
+	add l
+	ld e, a
+	pop af
+	or a
+	push af
+	jr nz, .skip
+	ld a, c
+
+.skip:
 	ld [de], a
 	inc de
 	push hl
-	push bc
-	push de
-	ret
+	jp .aEnd
+
 .b:
-	pop de
-	pop bc
 	pop hl
-	inc bc
+	ld a, $4
+	cp l
+	push hl
+	jr nz, .continue
+	jp .bEnd
+
+.continue:
+	pop hl
+	ld de, $9840 - 4
+	ld a, e
+	add l
+	ld e, a
 	xor a
-	ld [hl-], a
+	dec hl
+	ld [hl], a
 	ld [de], a
 	dec de
 	push hl
-	push bc
-	push de
-	ret
+	jp .bEnd
+
 .select:
-	ret
+	jp .selectEnd
