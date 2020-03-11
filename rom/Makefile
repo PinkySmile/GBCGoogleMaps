@@ -17,7 +17,9 @@ FXFLAGS =
 FX = rgbgfx
 
 SRCS =	src/main.asm \
-	src/mem_layout.asm
+	src/mem_layout.asm \
+	src/assets.asm \
+	src/text.asm
 
 IMGS = 	assets/font.png
 

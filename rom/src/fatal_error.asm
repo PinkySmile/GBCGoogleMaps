@@ -1,3 +1,15 @@
+; Called when the pc is at $0038
+; Params:
+;    None
+; Return:
+;    None
+; Registers:
+;    N/A
+pcAt38Error::
+	ld hl, pc38hText
+	ld bc, pc38hTextEnd - pc38hText
+	jp dispError
+
 ; Displays an error message and lock CPU
 ; Params:
 ;    hl -> Text to display

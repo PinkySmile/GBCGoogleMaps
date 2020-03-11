@@ -38,14 +38,6 @@ testSGB::
 	xor b
 	ret
 
-; The text displayed when playing on a Gameboy
-onlyGBCtext::
-	db "You need a   ", " ",          "                  "
-	db "Gameboy Color", TM_CHARACTER, " or a             "
-	db "Super Gameboy", TM_CHARACTER, "                  "
-	db "to run this."
-onlyGBCtextEnd:
-
 ; Main function
 main::
 	call init               ; Init

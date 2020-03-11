@@ -1,7 +1,3 @@
-; The fonts used.
-textAssets: incbin "assets/font.fx"
-textAssetsEnd:
-
 ; Uncompress compressed data
 ; Params:
 ;    hl -> Pointer to the compressed data
@@ -420,15 +416,27 @@ getSelectedLetter::
 typeText::
 	push af
 
-	ld hl, $C004
+	ld hl, $C004 ; Buffer initial value
 	push hl
 
-	call loadTextAsset
-	call displayKeyboard
+	call loadTextAsset   ; Load fonts
+	call displayKeyboard ; Display keyboard on screen
 
 	xor a
 	ld de, OAM_SRC_START
 	ld bc, $A0
+	call fillMemory
+
+	ld de, $C004
+	ld bc, $3E
+	call fillMemory
+
+	ld de, $9840
+	ld bc, 20
+	call fillMemory
+
+	ld de, OAM_SRC_START
+	ld bc, $9F
 	call fillMemory
 
 	ld hl, OAM_SRC_START
@@ -487,6 +495,8 @@ typeText::
 	bit 7, a ; Start
 	jr nz, .loop
 
+	pop hl
+	pop af
 	ret
 .right:
 	ld a, [OAM_SRC_START + 1]
@@ -568,10 +578,10 @@ typeText::
 	ld a, $4
 	cp l
 	push hl
-	jr nz, .continue
+	jr nz, .continueB
 	jp .bEnd
 
-.continue:
+.continueB:
 	pop hl
 	ld de, $9840 - 4
 	ld a, e
