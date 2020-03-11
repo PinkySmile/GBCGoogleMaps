@@ -420,6 +420,12 @@ getSelectedLetter::
 ;    de -> Not preserved
 ;    hl -> Not preserved
 typeText::
+	push hl
+	push bc
+
+	ld de, $9021
+	push de
+
 	call loadTextAsset
 	call displayKeyboard
 
@@ -439,11 +445,9 @@ typeText::
 	ld a, %00100000
 	ld [hli], a
 
-	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE_SPRITE
 .loop:
 	call waitVBLANK
-	call getSelectedLetter
-	ld [$9800], a
 	call getKeysFiltered
 
 	ld b, a
@@ -520,15 +524,30 @@ typeText::
 	ret
 
 .a:
-	ld a, [OAM_SRC_START + 1]
-	add a, $10
-	ld [OAM_SRC_START + 1], a
+	pop de
+	pop bc
+	pop hl
+	call getSelectedLetter
+	dec bc
+	ld [hli], a
+	ld [de], a
+	inc de
+	push hl
+	push bc
+	push de
 	ret
 .b:
-	ld a, [OAM_SRC_START + 1]
-	add a, $10
-	ld [OAM_SRC_START + 1], a
+	pop de
+	pop bc
+	pop hl
+	inc bc
+	xor a
+	ld [hl-], a
+	ld [de], a
+	dec de
+	push hl
+	push bc
+	push de
 	ret
 .select:
 	ret
-
