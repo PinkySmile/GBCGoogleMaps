@@ -420,7 +420,9 @@ typeText::
 	jp .b
 .bEnd:
 
+	push bc
 	call getKeys
+	pop bc
 	bit 6, a ; Select
 	jr nz, .selectNotPressed
 	jp .select
