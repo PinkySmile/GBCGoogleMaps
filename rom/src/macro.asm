@@ -19,3 +19,13 @@ reset: MACRO
 	xor a
 	ld [\1], a
 ENDM
+
+send_command: MACRO
+	ld de, SEND_COMMAND_REGISTER + 1
+	ld hl, COMMAND_BUFFER
+	ld bc, \2
+	call copyMemory
+
+	ld a, \1
+	ld [SEND_COMMAND_REGISTER], a
+ENDM

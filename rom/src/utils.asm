@@ -353,7 +353,7 @@ typeText::
 	call fillMemory
 
 	ld de, TYPED_TEXT_BUFFER
-	ld bc, $3F
+	ld bc, MAX_TYPED_BUFFER_SIZE
 	call fillMemory
 
 	ld de, $9840
