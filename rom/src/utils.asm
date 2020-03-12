@@ -505,7 +505,6 @@ typeText::
 
 .skip:
 	ld [de], a
-	inc de
 	push hl
 	jp .aEnd
 
@@ -527,7 +526,6 @@ typeText::
 	dec hl
 	ld [hl], a
 	ld [de], a
-	dec de
 	push hl
 	jp .bEnd
 
