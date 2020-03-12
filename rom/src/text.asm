@@ -17,8 +17,7 @@ generalInfos::
 	db "[A]: Search location", 10, 10, 10
 	db "[B]: Network", 10
 	db "     configuration", 10, 10, 10
-	db "Select: Go back", 10
-	db "        to map", 10, 10, 10
+	db "Select: Go to map", 10, 10, 10
 	db "Directions: Move map", 0
 
 changeSSIDText::
