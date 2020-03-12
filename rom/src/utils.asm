@@ -390,7 +390,8 @@ typeText::
 
 	ld b, a
 	bit 4, a ; A
-	jr z, .a
+	jr nz, .aEnd
+	jp .a
 .aEnd:
 
 	ld a, b
@@ -415,13 +416,38 @@ typeText::
 
 	ld a, b
 	bit 5, a ; B
-	jr z, .b
+	jr nz, .bEnd
+	jp .b
 .bEnd:
 
-	ld a, b
+	call getKeys
 	bit 6, a ; Select
-	jr nz, .selectEnd
+	jr nz, .selectNotPressed
 	jp .select
+
+.selectNotPressed:
+	pop hl
+	pop af
+	push af
+	push hl
+
+	or a
+	jr z, .selectEnd
+
+	push bc
+	push af
+
+	ld hl, TYPED_TEXT_BUFFER
+	call str_len
+
+	ld de, $9841
+	ld b, $00
+	ld c, a
+	pop af
+	call fillMemory
+	pop bc
+
+
 .selectEnd:
 
 	ld a, b
@@ -479,7 +505,9 @@ typeText::
 	ld a, (TYPED_TEXT_BUFFER & $FF) + MAX_TYPED_BUFFER_SIZE
 	cp l
 	push hl
-	jr z, .aEnd
+	jr nz, .aContinue
+	jp .aEnd
+.aContinue:
 
 	push bc
 	call getSelectedLetter
@@ -530,4 +558,21 @@ typeText::
 	jp .bEnd
 
 .select:
+	pop hl
+	pop af
+	push af
+	push hl
+
+	or a
+	jr nz, .selectNext
+	jp .selectEnd
+.selectNext:
+
+	push bc
+	ld hl, TYPED_TEXT_BUFFER
+	ld de, $9841
+	ld bc, $1F
+	call copyMemory
+	pop bc
+
 	jp .selectEnd
