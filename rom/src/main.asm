@@ -96,8 +96,6 @@ welcomeScreen::
 	ld a, b
 	bit 5, a
 	jr nz, .loop
-	ld de, welcomeScreen
-	push de
 	jp changeNetworkConfig
 
 

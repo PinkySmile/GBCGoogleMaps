@@ -27,4 +27,4 @@ changeNetworkConfig::
 
 	; Connect to wifi
 	send_command CONNECT_WIFI, $3E
-	ret
+	jp map
