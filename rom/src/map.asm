@@ -1,0 +1,2 @@
+map::
+	jp welcomeScreen

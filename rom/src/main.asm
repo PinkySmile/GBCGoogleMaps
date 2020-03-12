@@ -78,43 +78,32 @@ welcomeScreen::
 	call displayText
 	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
 .loop:
+	call waitVBLANK
 	call getKeysFiltered
-	xor $FF
-	jr z, .loop
 
-changeSSID::
-	ld hl, COMMAND_BUFFER
-	push hl
+	ld b, a
+	bit 4, a ; A
+	jr nz, .aEnd
+	jp search
+.aEnd:
 
-	call loadTextAsset
-	ld hl, changeSSIDText
-	call displayText
-	xor a
-	call typeText
+	ld b, a
+	bit 6, a ; Select
+	jr nz, .selectEnd
+	jp map
+.selectEnd:
 
-	pop de
-	ld hl, TYPED_TEXT_BUFFER
-	ld bc, MAX_TYPED_BUFFER_SIZE
-	call copyMemory
+	ld a, b
+	bit 5, a
+	jr nz, .loop
+	ld de, welcomeScreen
 	push de
-
-	; Change passwd
-	ld hl, networkPasswdText
-	call displayText
-	ld a, "*"
-	call typeText
-
-	pop de
-	ld hl, TYPED_TEXT_BUFFER
-	ld bc, MAX_TYPED_BUFFER_SIZE
-	call copyMemory
-
-	; Connect to wifi
-	send_command CONNECT_WIFI, $3E
-
-	jp welcomeScreen
+	jp changeNetworkConfig
 
 
+include "src/changeNetwork.asm"
+include "src/search.asm"
+include "src/map.asm"
 include "src/init.asm"
 include "src/fatal_error.asm"
 include "src/utils.asm"
