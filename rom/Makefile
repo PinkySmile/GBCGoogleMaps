@@ -25,6 +25,11 @@ IMGS = 	assets/font.png
 
 IMGSFX = $(IMGS:%.png=%.fx)
 
+COLORED_IMGS = 	assets/google_logo_left.png \
+	assets/google_logo_right.png
+
+COLORED_IMGSFX = $(COLORED_IMGS:%.png=%.cfx)
+
 OBJS = $(SRCS:%.asm=%.o)
 
 all:	tools/compressor $(NAME).gbc
@@ -38,6 +43,9 @@ run:	re
 runw:	re
 	"$(BGB_PATH)" ./$(NAME).gbc
 
+%.cfx : %.png
+	$(FX) $(FXFLAGS) -P -o $@ $<
+
 %.fx : %.png
 	$(FX) $(FXFLAGS) -o $@ $<
 	tools/compressor $@
@@ -45,7 +53,7 @@ runw:	re
 %.o : %.asm
 	$(ASM) -o $@ $(ASMFLAGS) $<
 
-$(NAME).gbc:	$(IMGSFX) $(OBJS)
+$(NAME).gbc:	$(COLORED_IMGSFX) $(IMGSFX) $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS)
 	$(FIX) $(FIXFLAGS) $@
 

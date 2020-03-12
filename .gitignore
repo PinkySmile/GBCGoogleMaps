@@ -6,6 +6,9 @@
 *.sym
 *.sav
 *.fx
+*.cfx
+*.ufx
+*.pal
 .idea
 rom/tools/compressor
 server/private

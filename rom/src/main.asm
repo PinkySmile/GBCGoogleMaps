@@ -69,6 +69,20 @@ SGB:                            ; We are on Super Gameboy
 welcomeScreen::
 	call loadTextAsset
 
+	ld de, BGPI
+	ld a, $88
+	ld [de], a
+	inc de
+
+	ld hl, googleLogoLeftPal
+	ld bc, $10
+	call copyMemorySingleAddr
+
+	ld de, $8010
+	ld hl, googleLogoLeft
+	ld bc, googleLogoRightEnd - googleLogoLeft
+	call copyMemory
+
 	xor a
 	ld de, VRAM_BG_START
 	ld bc, $800
@@ -108,3 +122,4 @@ include "src/utils.asm"
 include "src/sgb_utils.asm"
 include "src/interrupts.asm"
 include "src/strutils.asm"
+include "src/palettes.asm"

@@ -48,6 +48,30 @@ copyMemory::
 	dec bc
 	jr copyMemory ; Recurse until bc is 0
 
+; Copies a chunk of memory into a single address
+; Params:
+;    bc -> The length of the chunk to copy
+;    de -> The destination address
+;    hl -> The source address
+; Return:
+;    None
+; Registers:
+;    af -> Not preserved
+;    bc -> Not preserved
+;    de -> Not preserved
+;    hl -> Not preserved
+copyMemorySingleAddr::
+	xor a ; Check if size is 0
+	or b
+	or c
+	ret z
+
+	; Copy a byte of memory from hl to de
+	ld a, [hli]
+	ld [de], a
+	dec bc
+	jr copyMemorySingleAddr ; Recurse until bc is 0
+
 ; Fill a chunk of memory with a single value
 ; Params:
 ;    a  -> Value to fill
