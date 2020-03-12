@@ -100,60 +100,6 @@ loadTextAsset::
 	pop af
 	ret
 
-; Copies a chunk of memory into another
-; Params:
-;    bc -> The length of the chunk to copy
-;    de -> The destination address
-;    hl -> The source address
-; Return:
-;    None
-; Registers:
-;    af -> Not preserved
-;    bc -> Not preserved
-;    de -> Not preserved
-;    hl -> Not preserved
-copyMemory::
-	xor a ; Check if size is 0
-	or b
-	or c
-	ret z
-
-	; Copy a byte of memory from hl to de
-	ld a, [hli]
-	ld [de], a
-	inc de
-	dec bc
-	jr copyMemory ; Recurse until bc is 0
-
-; Fill a chunk of memory with a single value
-; Params:
-;    a  -> Value to fill
-;    bc -> The length of the chunk to copy
-;    de -> The destination address
-; Return:
-;    None
-; Registers:
-;    af -> Not preserved
-;    bc -> Not preserved
-;    de -> Not preserved
-;    hl -> Preserved
-fillMemory::
-	push af ; Save a
-	xor a   ; Check if bc is 0
-	or b
-	or c
-	jr z, .return
-	pop af
-
-	; Load a into de
-	ld [de], a
-	inc de
-	dec bc
-	jr fillMemory ; Recurse intil bc is 0
-.return: ; End of recursion
-	pop af
-	ret
-
 ; Wait for VBLANK. Only returns when a VBLANK occurs.
 ; Params:
 ;    None
@@ -178,40 +124,6 @@ waitVBLANK::
 	pop af ; Restore old interrupt enabled
 	ld [INTERRUPT_ENABLED], a
 	ret
-
-; Displays text on screen.
-; Params:
-;    hl -> Pointer to the start of the text.
-; Return:
-;    None
-; Registers:
-;    af -> Not preserved
-;    bc -> Not preserved
-;    de -> Not preserved
-;    hl -> Not preserved
-displayText::
-	call waitVBLANK
-	reset LCD_CONTROL
-	ld de, VRAM_BG_START
-.loop:
-	ld a, [hli]
-
-	or a
-	ret z
-
-	cp 10
-	jr z, .newLine
-
-	ld [de], a
-	inc de
-
-	jr .loop
-.newLine:
-	inc de
-	ld a, %11111
-	and e
-	jr nz, .newLine
-	jr .loop
 
 ; Wait for VBLANK. Only returns when a VBLANK occurs.
 ; Params:
@@ -422,7 +334,7 @@ getSelectedLetter::
 ; Params:
 ;    a  -> Character which replace typed text (\0 for no covering)
 ; Return:
-;    [$C004 - $C043] -> The typed text
+;    [$C004 - $C023] -> The typed text
 ; Registers:
 ;    af -> Preserved
 ;    bc -> Not preserved
@@ -431,7 +343,7 @@ getSelectedLetter::
 typeText::
 	push af
 
-	ld hl, $C004 ; Buffer initial value
+	ld hl, TYPED_TEXT_BUFFER ; Buffer initial value
 	push hl
 	call displayKeyboard ; Display keyboard on screen
 
@@ -440,12 +352,12 @@ typeText::
 	ld bc, $A0
 	call fillMemory
 
-	ld de, $C004
-	ld bc, $3E
+	ld de, TYPED_TEXT_BUFFER
+	ld bc, $3F
 	call fillMemory
 
 	ld de, $9840
-	ld bc, 20
+	ld bc, $1F
 	call fillMemory
 
 	ld de, OAM_SRC_START
@@ -463,9 +375,17 @@ typeText::
 	ld a, %00100000
 	ld [hli], a
 
+	ld hl, STAT_CONTROL
+	set 6, [hl]
+
+	reg LYC, $08
+	reg INTERRUPT_ENABLED, LCD_STAT_INTERRUPT | VBLANK_INTERRUPT
 	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE_SPRITE
 .loop:
-	call waitVBLANK
+	ld a, [LY]
+	cp $91
+	jr nz, .loop
+
 	call getKeysFiltered
 
 	ld b, a
@@ -507,6 +427,9 @@ typeText::
 	ld a, b
 	bit 7, a ; Start
 	jr nz, .loop
+
+	ld hl, STAT_CONTROL
+	res 6, [hl]
 
 	pop hl
 	pop af
@@ -553,7 +476,7 @@ typeText::
 
 .a:
 	pop hl
-	ld a, $41
+	ld a, (TYPED_TEXT_BUFFER & $FF) + MAX_TYPED_BUFFER_SIZE
 	cp l
 	push hl
 	jr z, .aEnd
@@ -570,7 +493,7 @@ typeText::
 	pop hl
 	ld [hli], a
 	ld c, a
-	ld de, $9840 - 4
+	ld de, $9840 - (TYPED_TEXT_BUFFER & $FF)
 	ld a, e
 	add l
 	ld e, a
@@ -588,7 +511,7 @@ typeText::
 
 .b:
 	pop hl
-	ld a, $4
+	ld a, TYPED_TEXT_BUFFER & $FF
 	cp l
 	push hl
 	jr nz, .continueB
@@ -596,7 +519,7 @@ typeText::
 
 .continueB:
 	pop hl
-	ld de, $9840 - 4
+	ld de, $9840 - (TYPED_TEXT_BUFFER & $FF)
 	ld a, e
 	add l
 	ld e, a

@@ -20,3 +20,9 @@ generalInfos::
 	db "Select: Go back", 10
 	db "        to map", 10, 10, 10
 	db "Directions: Move map", 0
+
+changeSSIDText::
+	db "Network SSID:", 0
+
+networkPasswdText::
+	db "Network password:", 0

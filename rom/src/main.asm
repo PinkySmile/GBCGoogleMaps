@@ -68,18 +68,38 @@ SGB:                            ; We are on Super Gameboy
 ; Runs the main program
 welcomeScreen::
 	call loadTextAsset
+
+	xor a
+	ld de, VRAM_BG_START
+	ld bc, $800
+	call fillMemory
+
 	ld hl, generalInfos
 	call displayText
 	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
-	jp lockup
+.loop:
+	call getKeysFiltered
+	xor $FF
+	jr z, .loop
 
 changeSSID::
-
+	call loadTextAsset
+	ld hl, changeSSIDText
+	call displayText
 	xor a
 	call typeText
+
+changePasswd::
+	call loadTextAsset
+	ld hl, networkPasswdText
+	call displayText
+	ld a, "*"
+	call typeText
+	jp welcomeScreen
 
 include "src/init.asm"
 include "src/fatal_error.asm"
 include "src/utils.asm"
 include "src/sgb_utils.asm"
 include "src/interrupts.asm"
+include "src/strutils.asm"

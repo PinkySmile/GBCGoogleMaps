@@ -34,6 +34,45 @@ vblank_interrupt::
 ;    de -> Preserved
 ;    hl -> Preserved
 hblank_interrupt::
+	push hl
+	push af
+	ld a, 1
+	ld hl, CREDITS_SLIDING
+	xor [hl]
+	ld [hl], a
+	bit 0, a
+	jr z, .reset
+
+	ld hl, TYPED_TEXT_BUFFER
+	call str_len
+
+	sub $13
+	jr c, .skip
+
+	inc a
+	rla
+	rla
+	rla
+	and %11111000
+
+	ld [SCROLL_X], a
+
+.skip:
+	ld hl, LYC
+	ld a, [hl]
+	add $10
+	ld [hl], a
+	jr .end
+.reset:
+	reset SCROLL_X
+	ld hl, LYC
+	ld a, [hl]
+	sub $10
+	ld [hl], a
+
+.end:
+	pop af
+	pop hl
 	reti
 
 ; Timer interrupt handler
