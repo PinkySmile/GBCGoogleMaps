@@ -29,7 +29,13 @@ initDMA_end:
 ;    hl -> Not preserved
 init::
 	push af
-	xor a
+
+	call waitVBLANK
+	reset LCD_CONTROL
+	ld de, VRAM_START + $10
+	ld bc, $190
+	call fillMemory
+
 	ld bc, $2000
 	ld de, $C000
 	call fillMemory

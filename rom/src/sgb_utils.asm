@@ -1,12 +1,14 @@
 ; SGB Opcodes parameter
-MLT_REQ_PAR:        ; Params for Multiplayer request
+MLT_REQ_PAR_EN:     ; Params for Multiplayer request
 MASK_EN_FREEZE_PAR: ; Params for freezing screen
+CHR_TRN_PAR_1:      ; Params for character transfer
 	db $01
-CHR_TRN_PAR:        ; Params for character transfer
+MASK_EN_CANCEL_PAR: ; Params for unfreezing screen
+CHR_TRN_PAR_0:      ; Params for character transfer
+MLT_REQ_PAR_DS:     ; Params for Multiplayer request
 PCT_TRN_PAR:        ; Params for color data
 PAL_TRN_PAR:        ; Params for palette data
-MASK_EN_CANCEL_PAR: ; Params for unfreezing screen
-	db $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+	db $00
 
 ; Sends a value to the SGB
 ; Params:
@@ -99,40 +101,103 @@ sendSGBCommand::
 	pop de
 	ret
 
-; Loads the cartridge SGB Boarder and send it to the SGB
-; af -> Not preserved
-; bc -> Not preserved
-; de -> Not preserved
-; hl -> Not preserved
+; Loads the cartridge SGB Border and send it to the SGB
+; Params:
+;    None
+; Return:
+;    None
+; Registers:
+;    af -> Not preserved
+;    bc -> Not preserved
+;    de -> Not preserved
+;    hl -> Not preserved
 loadSGBBorder::
+	ei
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
+	call waitVBLANK
+	call waitVBLANK
+	reset LCD_CONTROL
+
 	; Disable screen view
-	reg PALETTE_REGISTER, $E4
 	ld a, MASK_EN
 	ld hl, MASK_EN_FREEZE_PAR
 	call sendSGBCommand
 
-	; Send tile characters
-	call trashVRAM
-	ld a, CHR_TRN
-	ld hl, CHR_TRN_PAR
-	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
-	call sendSGBCommand
+	; Prepare VRAM map
+	reg PALETTE_REGISTER, $E4
+	ld hl, VRAM_BG_START
+	ld bc, 12
+	ld d, 20
+	ld a, 0
+.loop:
+	ld [hli], a
+	inc a
+	jr z, .end
+	dec d
+	jr nz, .loop
+	ld d, 20
+	add hl, bc
+	jr .loop
+.end:
 
-	; Send tile data
-	call trashVRAM
+	reg ROM_BANK_SWITCH, BANK(SGBBorderTileMap)
+
+	; Send tile characters
+	ld de, VRAM_START
+	ld bc, $1000
+	ld hl, SGBBorderTileCharacters
+	call copyMemory
+
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
+	ld a, CHR_TRN
+	ld hl, CHR_TRN_PAR_0
+	call sendSGBCommand
+	ld a, 6
+	call waitFrames
+
+
+	call waitVBLANK
+	reset LCD_CONTROL
+	ld de, VRAM_START
+	ld bc, $1000
+	ld hl, SGBBorderTileCharacters + $1000
+	call copyMemory
+
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
+	ld a, CHR_TRN
+	ld hl, CHR_TRN_PAR_1
+	call sendSGBCommand
+	ld a, 6
+	call waitFrames
+
+	; Send tile map and palettes
+	call waitVBLANK
+	reset LCD_CONTROL
+	ld de, VRAM_START
+	ld bc, $1000
+	ld hl, SGBBorderTileMap
+	call copyMemory
+
+	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
 	ld a, PCT_TRN
 	ld hl, PCT_TRN_PAR
-	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
 	call sendSGBCommand
+	ld a, 6
+	call waitFrames
 
 	; Send palette data
-	call trashVRAM
-	ld a, PAL_TRN
-	ld hl, PAL_TRN_PAR
-	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
-	call sendSGBCommand
+;	call trashVRAM
+;	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
+;	ld a, PAL_TRN
+;	ld hl, PAL_TRN_PAR
+;	call sendSGBCommand
+;	ld a, 6
+;	call waitFrames
 
 	; Enable screen view
 	ld a, MASK_EN
 	ld hl, MASK_EN_CANCEL_PAR
 	call sendSGBCommand
+
+	di
+	reset ROM_BANK_SWITCH

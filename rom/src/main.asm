@@ -27,7 +27,7 @@ lockup::
 ;    hl -> Not preserved
 testSGB::
 	ld a, MLT_REQ
-	ld hl, MLT_REQ_PAR
+	ld hl, MLT_REQ_PAR_EN
 	call sendSGBCommand
 	ld hl, JOYPAD_REGISTER
 	ld b, [hl]
@@ -36,6 +36,11 @@ testSGB::
 	ld [hl], %11110000
 	ld a, [hl]
 	xor b
+	push af
+	ld a, MLT_REQ
+	ld hl, MLT_REQ_PAR_DS
+	call sendSGBCommand
+	pop af
 	ret
 
 ; Main function
@@ -123,3 +128,4 @@ include "src/sgb_utils.asm"
 include "src/interrupts.asm"
 include "src/strutils.asm"
 include "src/palettes.asm"
+include "src/sgb_border.asm"

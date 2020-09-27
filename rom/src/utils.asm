@@ -139,12 +139,12 @@ waitFrames::
 	ld hl, FRAME_COUNTER
 	ld [hl], a
 	reg INTERRUPT_ENABLED, VBLANK_INTERRUPT
-	xor a
 .loop:
 	or [hl]
 	ret z
+	xor a
 	halt
-	jr nz, .loop
+	jr .loop
 
 
 dispBorderLine::

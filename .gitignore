@@ -9,6 +9,11 @@
 *.cfx
 *.ufx
 *.pal
+*.sgbpal
+*.sgbmap
+*.sgbchr
 .idea
 rom/tools/compressor
 server/private
+CMakeLists.txt
+cmake-build-*
