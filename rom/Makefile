@@ -28,14 +28,21 @@ IMGSFX = $(IMGS:%.png=%.fx)
 COLORED_IMGS = 	assets/google_logo_left.png \
 	assets/google_logo_right.png
 
+SGB_BORDER = assets/border.png
+
+SGB_BORDER_FX = $(SGB_BORDER:%.png=%.sgbchr)
+
 COLORED_IMGSFX = $(COLORED_IMGS:%.png=%.cfx)
 
 OBJS = $(SRCS:%.asm=%.o)
 
-all:	tools/compressor $(NAME).gbc
+all:	tools/compressor tools/sgb_border $(NAME).gbc
 
 tools/compressor:
 	$(MAKE) -C tools compressor
+
+tools/sgb_border:
+	$(MAKE) -C tools sgb_border
 
 run:	re
 	wine "$(BGB_PATH)" ./$(NAME).gbc
@@ -50,10 +57,13 @@ runw:	re
 	$(FX) $(FXFLAGS) -o $@ $<
 	tools/compressor $@
 
+%.sgbchr : %.png
+	tools/sgb_border $< $@ `echo $@ | rev | sed 's/rhcbgs/lapbgs/' | rev` `echo $@ | rev | sed 's/rhcbgs/pambgs/' | rev`
+
 %.o : %.asm
 	$(ASM) -o $@ $(ASMFLAGS) $<
 
-$(NAME).gbc:	$(COLORED_IMGSFX) $(IMGSFX) $(OBJS)
+$(NAME).gbc:	$(SGB_BORDER_FX) $(COLORED_IMGSFX) $(IMGSFX) $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS)
 	$(FIX) $(FIXFLAGS) $@
 

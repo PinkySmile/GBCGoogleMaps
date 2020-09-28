@@ -21,7 +21,7 @@ typedef struct image_s {
 } Image;
 
 typedef struct __attribute__((__packed__)) bg_attr_s {
-	unsigned char tile_no: 8;
+	unsigned short tile_no: 10;
 	unsigned char pal_no: 3;
 	bool bg_priority: 1;
 	bool x_flip: 1;
@@ -42,7 +42,6 @@ typedef struct processed_image_s {
 	Palette palettes[4];
 	unsigned pal_nbr;
 	unsigned char *tile_buff;
-	Tile tiles[28][32];
 	unsigned tiles_nbr;
 	BGAttributes map[28][32];
 } ProcessedImage;
@@ -98,7 +97,7 @@ Image read_png_file(const char *path)
 	size_t size = png_get_rowbytes(img.png_ptr, img.info_ptr);
 
 	img.row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * img.height);
-	for (int y = 0; y < img.height; y++) {
+	for (unsigned y = 0; y < img.height; y++) {
 		img.row_pointers[y] = malloc(size);
 		if (!img.row_pointers[y])
 			error("Cannot malloc %lu", size);
@@ -117,6 +116,7 @@ union pal_s convert_color(Pixel color)
 	pal.r = color.r >> 3U;
 	pal.g = color.g >> 3U;
 	pal.b = color.b >> 3U;
+	pal.val += !pal.val;
 	return pal;
 }
 
@@ -161,10 +161,15 @@ unsigned make_tile_palette(ProcessedImage *result, Pixel *tile[8])
 	unsigned best_index = 0;
 	unsigned pal = 0;
 	Palette temp;
-	unsigned char last_color = 0;
+	unsigned char last_color = 1;
 
+	memset(temp, 0, sizeof(temp));
+	temp[0].is_used = true;
 	for (int x = 0; x < 8; x++) {
 		for (int y = 0; y < 8; y++) {
+			if (!tile[y][x].a)
+				continue;
+
 			unsigned short converted = convert_color(tile[y][x]).val;
 
 			if (!palette_has_color(temp, converted)) {
@@ -220,24 +225,24 @@ void populate_attribute(unsigned char *tile_buf, ProcessedImage *img, BGAttribut
 	}
 
 	for (int y = 0; y < 8; y++) {
-		for (int i = 0; i < 4; i++)
-			memcpy(
-				&tile_flip_y[7 - y][i / 2][i % 2],
-				&tile_temp[y][i / 2][i % 2],
-				2
-			);
+		for (int i = 0; i < 2; i++) {
+			tile_flip_y[7 - y][i][0] = tile_temp[y][i][0];
+			tile_flip_y[7 - y][i][1] = tile_temp[y][i][1];
+		}
 
 		for (int x = 0; x < 8; x++) {
 			for (int i = 0; i < 2; i++) {
-				unsigned char col = tile_temp[y][x / 4][i] & 0b11U;
+				for (unsigned j = 0; j < 2; j++) {
+					unsigned char col = tile_temp[y][j][i] & 0b1U;
 
-				tile_temp[y][x / 4][i] >>= 2U;
+					tile_temp[y][i][j] >>= 1U;
 
-				tile_flip_x[y][1 - x / 4][i] <<= 2U;
-				tile_flip_x[y][1 - x / 4][i] |= col;
+					tile_flip_x[y][i][1 - j] <<= 1U;
+					tile_flip_x[y][i][1 - j] |= col;
 
-				tile_flip_x_y[7 - y][1 - x / 4][i] <<= 2U;
-				tile_flip_x_y[7 - y][1 - x / 4][i] |= col;
+					tile_flip_x_y[7 - y][i][1 - j] <<= 1U;
+					tile_flip_x_y[7 - y][i][1 - j] |= col;
+				}
 			}
 		}
 	}
@@ -261,6 +266,8 @@ void populate_attribute(unsigned char *tile_buf, ProcessedImage *img, BGAttribut
 		}
 		attr->tile_no++;
 	}
+	if (img->tiles_nbr == 256)
+		error("Too many tiles");
 	img->tiles_nbr++;
 	memcpy(&img->tile_buff[attr->tile_no * 32], tile_buf, 32);
 }
@@ -285,7 +292,7 @@ BGAttributes make_tile_data(ProcessedImage *result, Pixel *tile[8], unsigned pal
 
 			if (tile[y][x].a) {
 				for (int i = 1; i < 16; i++) {
-					if (col.val == result->palettes[pal_no][i].val) {
+					if (result->palettes[pal_no][i].is_used && col.val == result->palettes[pal_no][i].val) {
 						color = i;
 						break;
 					}
@@ -293,8 +300,11 @@ BGAttributes make_tile_data(ProcessedImage *result, Pixel *tile[8], unsigned pal
 			}
 
 			for (unsigned i = 0; i < 2; i++) {
-				converted[y][x / 4][i] <<= 2U;
-				converted[y][x / 4][i] |= (color << (2U * i)) & 0b11U;
+				for (unsigned j = 0; j < 2; j++) {
+					converted[y][i][j] <<= 1U;
+					converted[y][i][j] |= color & 0b1U;
+					color >>= 1U;
+				}
 			}
 		}
 	}
@@ -312,15 +322,8 @@ ProcessedImage process_image(Image img)
 	if (img.height != 224 || img.width != 256)
 		error("Image must be 256x224 but is %ix%i", img.width, img.height);
 
-	result.tile_buff = calloc(32 * 32 * 28, sizeof(*result.tile_buff));
-	for (int x = 0; x < 32; x++) {
-		for (int y = 0; y < 28; y++) {
-			for (int i = 0; i < 8; i++) {
-				result.tiles[y][x][i][0] = &result.tile_buff[(x + y * 32) * 32 + i * 2];
-				result.tiles[y][x][i][1] = &result.tile_buff[(x + y * 32) * 32 + i * 2 + 16];
-			}
-		}
-	}
+	memset(&result, 0, sizeof(result));
+	result.tile_buff = calloc(256, sizeof(*result.tile_buff) * 32);
 	for (unsigned y = 0; y < img.height; y++) {
 		Pixel *row = (Pixel *)img.row_pointers[y];
 		for (unsigned x = 0; x < img.width; x++)

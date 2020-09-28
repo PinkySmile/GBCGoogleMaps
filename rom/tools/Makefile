@@ -1,9 +1,3 @@
-NAME =	compressor
-
-SRC =	compressor.c
-
-OBJ =	$(SRC:%.c=%.o)
-
 INC =
 
 LDFLAGS =
@@ -17,16 +11,19 @@ CC =	gcc
 
 LIBS =
 
-all:	$(LIBS) $(NAME)
+all:	$(LIBS) compressor sgb_border
 
-$(NAME):$(OBJ)
-	$(CC) -o $(NAME) $(OBJ) $(LDFLAGS)
+sgb_border:sgb_border.o
+	$(CC) -o sgb_border sgb_border.o $(LDFLAGS) -lpng
+
+compressor:compressor.o
+	$(CC) -o compressor compressor.o $(LDFLAGS)
 
 clean:
-	$(RM) $(OBJ)
+	$(RM) sgb_border.o compressor.o
 
 fclean:	clean
-	$(RM) $(NAME) $(NAME).exe
+	$(RM) compressor compressor.exe sgb_border sgb_border.exe
 
 ffclean:fclean
 
