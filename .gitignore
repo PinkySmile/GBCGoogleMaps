@@ -14,6 +14,7 @@
 *.sgbchr
 .idea
 rom/tools/compressor
+rom/tools/sgb_border
 server/private
 CMakeLists.txt
 cmake-build-*
