@@ -131,12 +131,15 @@ bool palette_has_color(Palette pal, unsigned short color)
 unsigned calc_mix_palettes_score(Palette pal1, Palette pal2)
 {
 	unsigned score = 0;
+	unsigned needed = 0;
 
-	if (pal1[15].is_used)
-		return UINT_MAX;
-
-	for (int i = 0; i < 16; i++)
+	for (int i = 0; i < 16; i++) {
+		needed += !palette_has_color(pal1, pal2[i].val);
 		score += pal2[i].is_used && !palette_has_color(pal1, pal2[i].val);
+	}
+
+	if (!needed || pal1[16 - needed].is_used)
+		return UINT_MAX;
 	return score;
 }
 
@@ -233,15 +236,15 @@ void populate_attribute(unsigned char *tile_buf, ProcessedImage *img, BGAttribut
 		for (int x = 0; x < 8; x++) {
 			for (int i = 0; i < 2; i++) {
 				for (unsigned j = 0; j < 2; j++) {
-					unsigned char col = tile_temp[y][j][i] & 0b1U;
+					unsigned char col = tile_temp[y][i][j] & 0b1U;
 
 					tile_temp[y][i][j] >>= 1U;
 
-					tile_flip_x[y][i][1 - j] <<= 1U;
-					tile_flip_x[y][i][1 - j] |= col;
+					tile_flip_x[y][i][j] <<= 1U;
+					tile_flip_x[y][i][j] |= col;
 
-					tile_flip_x_y[7 - y][i][1 - j] <<= 1U;
-					tile_flip_x_y[7 - y][i][1 - j] |= col;
+					tile_flip_x_y[7 - y][i][j] <<= 1U;
+					tile_flip_x_y[7 - y][i][j] |= col;
 				}
 			}
 		}
@@ -338,6 +341,8 @@ ProcessedImage process_image(Image img)
 			row[i] = (Pixel *)img.row_pointers[y + i];
 
 		for (unsigned x = 0; x < img.width; x += 8) {
+			if (y == 104)
+				printf("\n");
 			unsigned palette = make_tile_palette(&result, row);
 			BGAttributes attr = make_tile_data(&result, row, palette);
 
