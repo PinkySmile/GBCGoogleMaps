@@ -138,7 +138,7 @@ unsigned calc_mix_palettes_score(Palette pal1, Palette pal2)
 		score += pal2[i].is_used && !palette_has_color(pal1, pal2[i].val);
 	}
 
-	if (!needed || pal1[16 - needed].is_used)
+	if (needed && pal1[16 - needed].is_used)
 		return UINT_MAX;
 	return score;
 }
@@ -341,8 +341,6 @@ ProcessedImage process_image(Image img)
 			row[i] = (Pixel *)img.row_pointers[y + i];
 
 		for (unsigned x = 0; x < img.width; x += 8) {
-			if (y == 104)
-				printf("\n");
 			unsigned palette = make_tile_palette(&result, row);
 			BGAttributes attr = make_tile_data(&result, row, palette);
 
