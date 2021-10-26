@@ -9,7 +9,7 @@
 ;    bc -> Preserved
 ;    de -> Preserved
 ;    hl -> Not preserved
-str_len::
+getStrLen::
 	xor a
 .loop:
 	push af

@@ -1,18 +1,14 @@
 changeNetworkConfig::
-	ld hl, commandBuffer
-	push hl
-
 	call loadTextAsset
+
+	; Change SSID
 	ld hl, changeSSIDText
 	call displayText
 	xor a
 	call typeText
 
-	pop de
-	ld hl, typedTextBuffer
-	ld bc, MAX_TYPED_BUFFER_SIZE
-	call copyMemory
-	push de
+	; Set harware SSID
+	send_command SET_SSID, typedTextBuffer, MAX_TYPED_BUFFER_SIZE
 
 	; Change passwd
 	ld hl, networkPasswdText
@@ -20,11 +16,9 @@ changeNetworkConfig::
 	ld a, "*"
 	call typeText
 
-	pop de
-	ld hl, typedTextBuffer
-	ld bc, MAX_TYPED_BUFFER_SIZE
-	call copyMemory
+	; Set harware passwd
+	send_command SET_PASSWD, typedTextBuffer, MAX_TYPED_BUFFER_SIZE
 
 	; Connect to wifi
-	send_command CONNECT_WIFI, $3E
+	send_command_nodata CONNECT_WIFI
 	jp map

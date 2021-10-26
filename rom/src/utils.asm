@@ -440,7 +440,7 @@ typeText::
 	push af
 
 	ld hl, typedTextBuffer
-	call str_len
+	call getStrLen
 
 	ld de, $9841
 	ld b, $00

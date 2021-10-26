@@ -24,3 +24,7 @@ oamSrc::
 stackTop::
 	ds $C800 - stackTop
 stackBottom::
+
+SECTION "MAP", WRAMX[$D000]
+tileMap::
+	ds $1000
