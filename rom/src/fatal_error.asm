@@ -22,7 +22,7 @@ dispError::
 	call loadTextAsset
 	; Display given text
 	call displayText
-	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
+	reg lcdCtrl, LCD_BASE_CONTROL_BYTE
 	; Play a sound and lock CPU
 	jp fatalError
 
@@ -34,18 +34,18 @@ dispError::
 ; Registers:
 ;    N/A
 fatalError::
-	reg DISABLE_CHANNELS_REGISTERS, $80
-	reset CHANNEL2_VOLUME
-	reset CHANNEL3_ON_OFF
-	reset CHANNEL4_VOLUME
+	reg NR52, $80
+	reset chan2Volume
+	ld [chan3Enable], a
+	ld [chan4Volume], a
 	ld c, $03
-	ld d, $00
+	ld d, a
 .loop:
-	reg CHANNEL1_LENGTH, %10000000
-	reg CHANNEL1_VOLUME, %11110001
-	reg CHANNEL1_LOW_FREQ, $FF
-        reg CHANNEL1_HIGH_FREQ,%10000001
-	ld b, $FF
+	reg chan1Len, %10000000
+	reg chan1Volume, %11110001
+        reg chan1FrequH,%10000001
+	reg chan1FrequL, $FF
+	ld b, a
 .loopWait:
 	dec d
 	jr nz, .loopWait

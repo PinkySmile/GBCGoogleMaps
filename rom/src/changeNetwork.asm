@@ -1,5 +1,5 @@
 changeNetworkConfig::
-	ld hl, COMMAND_BUFFER
+	ld hl, commandBuffer
 	push hl
 
 	call loadTextAsset
@@ -9,7 +9,7 @@ changeNetworkConfig::
 	call typeText
 
 	pop de
-	ld hl, TYPED_TEXT_BUFFER
+	ld hl, typedTextBuffer
 	ld bc, MAX_TYPED_BUFFER_SIZE
 	call copyMemory
 	push de
@@ -21,7 +21,7 @@ changeNetworkConfig::
 	call typeText
 
 	pop de
-	ld hl, TYPED_TEXT_BUFFER
+	ld hl, typedTextBuffer
 	ld bc, MAX_TYPED_BUFFER_SIZE
 	call copyMemory
 

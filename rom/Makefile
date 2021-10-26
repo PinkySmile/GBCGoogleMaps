@@ -6,7 +6,7 @@ LD = rgblink
 
 FIX = rgbfix
 
-FIXFLAGS = -Cjsv -k 01 -l 0x33 -m 0x1f -p 0 -r 00 -t "`echo "$(NAME)" | tr a-z A-Z | tr "_" " "`"
+FIXFLAGS = -jsvC -k 01 -l 0x33 -m 0x1f -p 0 -t "`echo "$(NAME)" | tr a-z A-Z | tr "_" " "`"
 
 ASMFLAGS =
 
@@ -19,7 +19,8 @@ FX = rgbgfx
 SRCS =	src/main.asm \
 	src/mem_layout.asm \
 	src/assets.asm \
-	src/text.asm
+	src/text.asm \
+	src/wram.asm
 
 IMGS = 	assets/font.png
 

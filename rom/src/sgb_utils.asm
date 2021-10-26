@@ -21,9 +21,9 @@ PAL_TRN_PAR:        ; Params for palette data
 ;    de -> Preserved
 ;    hl -> Preserved
 sendSGBVal::
-	ld [JOYPAD_REGISTER], a         ; Put value in Joypad register
+	ld [joypad], a         ; Put value in Joypad register
 	nop                             ; Wait a bit
-	reg JOYPAD_REGISTER, %00110000  ; Reset data lines
+	reg joypad, %00110000  ; Reset data lines
 	ret
 
 ; Sends a single bit of data to the SGB
@@ -113,10 +113,10 @@ sendSGBCommand::
 ;    hl -> Not preserved
 loadSGBBorder::
 	ei
-	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
+	reg lcdCtrl, LCD_BASE_CONTROL_BYTE
 	call waitVBLANK
 	call waitVBLANK
-	reset LCD_CONTROL
+	reset lcdCtrl
 
 	; Disable screen view
 	ld a, MASK_EN
@@ -124,8 +124,8 @@ loadSGBBorder::
 	call sendSGBCommand
 
 	; Prepare VRAM map
-	reg PALETTE_REGISTER, $E4
-	ld hl, VRAM_BG_START
+	reg dmgBgPalData, $E4
+	ld hl, VRAMBgStart
 	ld bc, 12
 	ld d, 20
 	ld a, 0
@@ -140,15 +140,15 @@ loadSGBBorder::
 	jr .loop
 .end:
 
-	reg ROM_BANK_SWITCH, BANK(SGBBorderTileMap)
+	reg ROMBankSelect, BANK(SGBBorderTileMap)
 
 	; Send tile characters
-	ld de, VRAM_START
+	ld de, VRAMStart
 	ld bc, $1000
 	ld hl, SGBBorderTileCharacters
 	call copyMemory
 
-	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
+	reg lcdCtrl, LCD_BASE_CONTROL_BYTE
 	ld a, CHR_TRN
 	ld hl, CHR_TRN_PAR_0
 	call sendSGBCommand
@@ -157,13 +157,13 @@ loadSGBBorder::
 
 
 	call waitVBLANK
-	reset LCD_CONTROL
-	ld de, VRAM_START
+	reset lcdCtrl
+	ld de, VRAMStart
 	ld bc, $1000
 	ld hl, SGBBorderTileCharacters + $1000
 	call copyMemory
 
-	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
+	reg lcdCtrl, LCD_BASE_CONTROL_BYTE
 	ld a, CHR_TRN
 	ld hl, CHR_TRN_PAR_1
 	call sendSGBCommand
@@ -172,13 +172,13 @@ loadSGBBorder::
 
 	; Send tile map and palettes
 	call waitVBLANK
-	reset LCD_CONTROL
-	ld de, VRAM_START
+	reset lcdCtrl
+	ld de, VRAMStart
 	ld bc, $1000
 	ld hl, SGBBorderTileMap
 	call copyMemory
 
-	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
+	reg lcdCtrl, LCD_BASE_CONTROL_BYTE
 	ld a, PCT_TRN
 	ld hl, PCT_TRN_PAR
 	call sendSGBCommand
@@ -187,7 +187,7 @@ loadSGBBorder::
 
 	; Send palette data
 ;	call trashVRAM
-;	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE
+;	reg lcdCtrl, LCD_BASE_CONTROL_BYTE
 ;	ld a, PAL_TRN
 ;	ld hl, PAL_TRN_PAR
 ;	call sendSGBCommand
@@ -200,4 +200,4 @@ loadSGBBorder::
 	call sendSGBCommand
 
 	di
-	reset ROM_BANK_SWITCH
+	reset ROMBankSelect

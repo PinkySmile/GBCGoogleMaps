@@ -22,7 +22,7 @@ ENDM
 
 send_command: MACRO
 	ld de, SEND_COMMAND_REGISTER + 1
-	ld hl, COMMAND_BUFFER
+	ld hl, commandBuffer
 	ld bc, \2
 	call copyMemory
 

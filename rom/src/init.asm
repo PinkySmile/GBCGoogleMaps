@@ -31,8 +31,8 @@ init::
 	push af
 
 	call waitVBLANK
-	reset LCD_CONTROL
-	ld de, VRAM_START + $10
+	reset lcdCtrl
+	ld de, VRAMStart + $10
 	ld bc, $190
 	call fillMemory
 

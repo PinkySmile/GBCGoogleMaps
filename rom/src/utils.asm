@@ -38,10 +38,10 @@ uncompress::
 random::
 	push hl
 
-	ld a, [RANDOM_REGISTER]
-	ld hl, DIV_REGISTER
+	ld a, [randomRegister]
+	ld hl, divReg
 	add a, [hl]
-	ld [RANDOM_REGISTER], a
+	ld [randomRegister], a
 
 	pop hl
 	ret
@@ -58,7 +58,7 @@ random::
 ;    hl -> Not preserved
 trashVRAM::
 	call waitVBLANK
-	reset LCD_CONTROL
+	reset lcdCtrl
 	ld hl, $9FFF
 .start:
 	call random
@@ -86,10 +86,10 @@ loadTextAsset::
 
 	call waitVBLANK
 	; Disable LCD
-	reset LCD_CONTROL
+	reset lcdCtrl
 	ld hl, textAssets
 	ld bc, textAssetsEnd - textAssets
-	ld de, VRAM_START
+	ld de, VRAMStart
 	; Copy text font info VRAM
 	call uncompress
 
@@ -111,18 +111,18 @@ loadTextAsset::
 ;    de -> Preserved
 ;    hl -> Preserved
 waitVBLANK::
-	ld a, [LCD_CONTROL] ; Check if LCD is disabled
+	ld a, [lcdCtrl] ; Check if LCD is disabled
 	bit 7, a
 	ret z
 
-	ld a, [INTERRUPT_ENABLED] ; Save old interrupt enabled
+	ld a, [interruptEnable] ; Save old interrupt enabled
 	push af
-	reset INTERRUPT_REQUEST; Clear old requests
-	reg INTERRUPT_ENABLED, VBLANK_INTERRUPT; Enable only VBLANK interrupt
+	reset interruptFlag; Clear old requests
+	reg interruptEnable, VBLANK_INTERRUPT; Enable only VBLANK interrupt
 .loop:
 	halt   ; Wait for interrupt
 	pop af ; Restore old interrupt enabled
-	ld [INTERRUPT_ENABLED], a
+	ld [interruptEnable], a
 	ret
 
 ; Wait for VBLANK. Only returns when a VBLANK occurs.
@@ -136,9 +136,9 @@ waitVBLANK::
 ;    de -> Preserved
 ;    hl -> Not preserved
 waitFrames::
-	ld hl, FRAME_COUNTER
+	ld hl, frameCounter
 	ld [hl], a
-	reg INTERRUPT_ENABLED, VBLANK_INTERRUPT
+	reg interruptEnable, VBLANK_INTERRUPT
 .loop:
 	or [hl]
 	ret z
@@ -296,7 +296,7 @@ getKeys::
 getKeysFiltered::
 	call getKeys
 	ld b, a
-	ld hl, KEYS_DISABLED
+	ld hl, keysDisabled
 	ld a, [hl]
 	or b
 	ld c, a
@@ -343,7 +343,7 @@ getSelectedLetter::
 typeText::
 	push af
 
-	ld hl, TYPED_TEXT_BUFFER ; Buffer initial value
+	ld hl, typedTextBuffer ; Buffer initial value
 	push hl
 	call displayKeyboard ; Display keyboard on screen
 
@@ -352,7 +352,7 @@ typeText::
 	ld bc, $A0
 	call fillMemory
 
-	ld de, TYPED_TEXT_BUFFER
+	ld de, typedTextBuffer
 	ld bc, MAX_TYPED_BUFFER_SIZE
 	call fillMemory
 
@@ -375,14 +375,14 @@ typeText::
 	ld a, %00100000
 	ld [hli], a
 
-	ld hl, STAT_CONTROL
+	ld hl, lcdStats
 	set 6, [hl]
 
-	reg LYC, $08
-	reg INTERRUPT_ENABLED, LCD_STAT_INTERRUPT | VBLANK_INTERRUPT
-	reg LCD_CONTROL, LCD_BASE_CONTROL_BYTE_SPRITE
+	reg lcdLineCmp, $08
+	reg interruptEnable, LCD_STAT_INTERRUPT | VBLANK_INTERRUPT
+	reg lcdCtrl, LCD_BASE_CONTROL_BYTE_SPRITE
 .loop:
-	ld a, [LY]
+	ld a, [lcdLine]
 	cp $91
 	jr nz, .loop
 
@@ -439,7 +439,7 @@ typeText::
 	push bc
 	push af
 
-	ld hl, TYPED_TEXT_BUFFER
+	ld hl, typedTextBuffer
 	call str_len
 
 	ld de, $9841
@@ -456,7 +456,7 @@ typeText::
 	bit 7, a ; Start
 	jr nz, .loop
 
-	ld hl, STAT_CONTROL
+	ld hl, lcdStats
 	res 6, [hl]
 
 	pop hl
@@ -504,7 +504,7 @@ typeText::
 
 .a:
 	pop hl
-	ld a, (TYPED_TEXT_BUFFER & $FF) + MAX_TYPED_BUFFER_SIZE
+	ld a, (typedTextBuffer & $FF) + MAX_TYPED_BUFFER_SIZE
 	cp l
 	push hl
 	jr nz, .aContinue
@@ -523,7 +523,7 @@ typeText::
 	pop hl
 	ld [hli], a
 	ld c, a
-	ld de, $9840 - (TYPED_TEXT_BUFFER & $FF)
+	ld de, $9840 - (typedTextBuffer & $FF)
 	ld a, e
 	add l
 	ld e, a
@@ -540,7 +540,7 @@ typeText::
 
 .b:
 	pop hl
-	ld a, TYPED_TEXT_BUFFER & $FF
+	ld a, typedTextBuffer & $FF
 	cp l
 	push hl
 	jr nz, .continueB
@@ -548,7 +548,7 @@ typeText::
 
 .continueB:
 	pop hl
-	ld de, $9840 - (TYPED_TEXT_BUFFER & $FF)
+	ld de, $9840 - (typedTextBuffer & $FF)
 	ld a, e
 	add l
 	ld e, a
@@ -571,7 +571,7 @@ typeText::
 .selectNext:
 
 	push bc
-	ld hl, TYPED_TEXT_BUFFER
+	ld hl, typedTextBuffer
 	ld de, $9841
 	ld bc, $1F
 	call copyMemory

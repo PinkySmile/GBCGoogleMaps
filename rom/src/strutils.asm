@@ -113,8 +113,8 @@ fillMemory::
 ;    hl -> Not preserved
 displayText::
 	call waitVBLANK
-	reset LCD_CONTROL
-	ld de, VRAM_BG_START
+	reset lcdCtrl
+	ld de, VRAMBgStart
 .loop:
 	ld a, [hli]
 
