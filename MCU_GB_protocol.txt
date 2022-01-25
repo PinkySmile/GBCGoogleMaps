@@ -1,0 +1,18 @@
+0xA000 - 0xAFFE
+GB -> MCU
+1 WiFi connect
+  -> SSID, PASSWD
+2 Server request
+  -> 2B Length
+  -> Data to be sent
+
+0xB000 - 0xBFFE
+MCU -> GB
+1 WiFi status
+  -> 0-255 Strength
+2 Server Response
+  -> 2B Length
+  -> Server sent data
+3 Error
+  -> Null terminated string
+4 Data queue is full

@@ -23,6 +23,35 @@ getStrLen::
 	pop af
 	ret
 
+
+; Copies a string into another location (equivalent to strncpy)
+; Params:
+;    bc -> The max length of the chunk to copy
+;    de -> The destination address
+;    hl -> The source address
+; Return:
+;    None
+; Registers:
+;    af -> Not preserved
+;    bc -> Not preserved
+;    de -> Not preserved
+;    hl -> Not preserved
+copyStr::
+	xor a ; Check if size is 0
+	or b
+	or c
+	ret z
+
+	; Copy a byte of memory from hl to de
+	ld a, [hli]
+	ld [de], a
+	inc de
+	dec bc
+	or a
+	ret z
+	jr copyStr ; Recurse until bc is 0
+
+
 ; Copies a chunk of memory into another
 ; Params:
 ;    bc -> The length of the chunk to copy

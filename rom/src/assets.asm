@@ -5,6 +5,10 @@ textAssets::
 	incbin "assets/font.fx"
 textAssetsEnd::
 
+wifiAssets::
+	incbin "assets/wifi_status.fx"
+wifiAssetsEnd::
+
 googleLogoLeft::
 	incbin "assets/google_logo_left.cfx"
 googleLogoLeftEnd::

@@ -8,7 +8,12 @@ changeNetworkConfig::
 	call typeText
 
 	; Set harware SSID
-	send_command SET_SSID, typedTextBuffer, MAX_TYPED_BUFFER_SIZE
+	ld bc, $100
+	ld de, myCmdBuffer
+	ld hl, typedTextBuffer
+	call copyStr
+	push bc
+	push de
 
 	; Change passwd
 	ld hl, networkPasswdText
@@ -16,9 +21,23 @@ changeNetworkConfig::
 	ld a, "*"
 	call typeText
 
-	; Set harware passwd
-	send_command SET_PASSWD, typedTextBuffer, MAX_TYPED_BUFFER_SIZE
+	; Set hardware passwd
+	pop de
+	pop bc
+	ld hl, typedTextBuffer
+	call copyStr
 
+	; Calculate data size
+	xor a
+	ld b, a
+	sub c
+	ld c, a
+	or a
+	jr nz, .skip
+	inc b
+.skip:
 	; Connect to wifi
-	send_command_nodata CONNECT_WIFI
-	jp map
+	xor a
+	ld [cartIntTrigger], a
+
+	jp loadMap

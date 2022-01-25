@@ -12,10 +12,10 @@ keysDisabled::
 	ds $1
 typedTextBuffer::
 	ds MAX_TYPED_BUFFER_SIZE
+zoomLevel::
+	ds $1
 commandBuffer::
 	ds $30
-bankPtr::
-	ds $2
 
 SECTION "OAM", WRAM0[$C500]
 oamSrc::
@@ -27,4 +27,18 @@ stackBottom::
 
 SECTION "MAP", WRAMX[$D000]
 tileMap::
-	ds $1000
+	ds $400
+
+SECTION "CDATA", SRAM[$A000]
+myCmdBuffer::
+	ds $200
+cartCmdBuffer::
+	ds $1FE
+cartIntTrigger::
+	ds $1
+myIntTrigger::
+	ds $1
+
+SECTION "CCTRL", SRAM[$B3FE]
+cartCtrl::
+	ds $1

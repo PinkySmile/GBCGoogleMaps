@@ -22,7 +22,7 @@ PAL_TRN_PAR:        ; Params for palette data
 ;    hl -> Preserved
 sendSGBVal::
 	ld [joypad], a         ; Put value in Joypad register
-	nop                             ; Wait a bit
+	nop                    ; Wait a bit
 	reg joypad, %00110000  ; Reset data lines
 	ret
 

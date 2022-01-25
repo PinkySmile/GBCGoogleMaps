@@ -4,6 +4,8 @@ include "src/registers.asm"
 
 SECTION "Main", ROM0
 
+include "src/protocol.asm"
+
 ; Locks the CPU
 ; Params:
 ;    None
@@ -110,7 +112,7 @@ welcomeScreen::
 	ld b, a
 	bit 6, a ; Select
 	jr nz, .selectEnd
-	jp map
+	jp loadMap
 .selectEnd:
 
 	ld a, b

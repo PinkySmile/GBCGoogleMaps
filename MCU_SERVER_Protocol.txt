@@ -1,0 +1,12 @@
+MCU -> SERVER
+1 - Get map
+  -> X 4B float
+  -> Y 4B float
+  -> Zoom 1B
+
+SERVER -> MCU
+1 - Map data
+  -> 32x32B tilemap
+  -> 1B nb sprites
+  -> ... Sprites(1B y  1B x  1B tile   1B attr byte)
+2 - Error

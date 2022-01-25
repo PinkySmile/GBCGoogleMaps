@@ -7,12 +7,10 @@
 ;    N/A
 pcAt38Error::
 	ld hl, pc38hText
-	jp dispError
 
 ; Displays an error message and lock CPU
 ; Params:
 ;    hl -> Text to display
-;    bc -> Length of the text
 ; Return:
 ;    None
 ; Registers:

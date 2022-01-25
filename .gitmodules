@@ -1,3 +1,6 @@
 [submodule "GBGMapServer"]
 	path = GBGMapServer
 	url = git@github.com:iElden/GBGMapServer
+[submodule "server"]
+	path = server
+	url = https://github.com/iElden/GBGMapServer

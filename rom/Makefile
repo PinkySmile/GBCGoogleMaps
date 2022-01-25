@@ -22,7 +22,8 @@ SRCS =	src/main.asm \
 	src/text.asm \
 	src/wram.asm
 
-IMGS = 	assets/font.png
+IMGS = assets/font.png \
+	assets/wifi_status.png
 
 IMGSFX = $(IMGS:%.png=%.fx)
 
@@ -47,6 +48,9 @@ tools/sgb_border:
 
 run:	re
 	wine "$(BGB_PATH)" ./$(NAME).gbc
+
+run2:	re
+	"$(GBEMU)" ./$(NAME).gbc -d
 
 runw:	re
 	"$(BGB_PATH)" ./$(NAME).gbc

@@ -27,23 +27,23 @@ reset: MACRO
 	ld [\1], a
 ENDM
 
-send_command_nodata: MACRO
-	ld a, \1
-	ld [SEND_COMMAND_REGISTER], a
-ENDM
+;send_command_nodata: MACRO
+;	ld a, \1
+;	ld [SEND_COMMAND_REGISTER], a
+;ENDM
 
-send_command: MACRO
-	send_command_nodata CLEAR_BUFFER1
-
-	ld hl, \2
-	call getStrLen
-	min \3
-	ld b, 0
-	ld c, a
-	ld hl, \2
-	ld de, BUFFER1_STREAM_REGISTER
-	call copyMemorySingleAddr
-
-	ld a, \1
-	ld [SEND_COMMAND_REGISTER], a
-ENDM
+;send_command: MACRO
+;	send_command_nodata CLEAR_BUFFER1
+;
+;	ld hl, \2
+;	call getStrLen
+;	min \3
+;	ld b, 0
+;	ld c, a
+;	ld hl, \2
+;	ld de, BUFFER1_STREAM_REGISTER
+;	call copyMemorySingleAddr
+;
+;	ld a, \1
+;	ld [SEND_COMMAND_REGISTER], a
+;ENDM
