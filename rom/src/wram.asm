@@ -14,8 +14,8 @@ typedTextBuffer::
 	ds MAX_TYPED_BUFFER_SIZE
 zoomLevel::
 	ds $1
-commandBuffer::
-	ds $30
+wifiLevel::
+	ds $1
 
 SECTION "OAM", WRAM0[$C500]
 oamSrc::
