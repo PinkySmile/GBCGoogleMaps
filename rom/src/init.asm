@@ -45,6 +45,8 @@ init::
 	ld hl, initDMA
 	call copyMemory
 
+	reg dmgBgPalData, %11100100
+
 	pop af
 	ret
 

@@ -28,6 +28,7 @@ IMGS = assets/font.png \
 IMGSFX = $(IMGS:%.png=%.fx)
 
 COLORED_IMGS = 	assets/google_logo_left.png \
+	assets/tilemap.png \
 	assets/google_logo_right.png
 
 SGB_BORDER = assets/border.png

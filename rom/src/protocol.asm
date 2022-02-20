@@ -19,9 +19,8 @@ ENDM
 
 ; Fetch the current tilemap to display from the server
 ; Params:
-;    a  -> Opcode
-;    hl -> Command data buffer
-;    bc -> Data size
+;    b -> scrollX
+;    c -> scrollY
 ; Return:
 ;    [tileMap - tileMap + $3FF] -> Loaded tilemap
 ; Registers:
@@ -43,11 +42,11 @@ getTileMap:
 	inc a
 	ld [hli], a
 
-	ld a, [bgScrollX]
+	ld a, b
 	sub $30
 	ld [hli], a
 
-	ld a, [bgScrollY]
+	ld a, c
 	sub $38
 	ld [hli], a
 
@@ -63,7 +62,7 @@ handlePacket::
 .loop:
 	ld a, [hli]
 	or a
-	ret z
+	jr z, .end
 	dec a
 	jr z, .wifi ; 1 WiFi status
 	dec a
@@ -85,7 +84,13 @@ handlePacket::
 	ld c, a
 	ld a, [hli]
 	ld b, a
+	push bc
+	push hl
 	call handleServerPacket
+	pop hl
+	pop bc
+	add hl, bc
+	ld b, b
 	jr .loop
 .err:
 	ld de, VRAMBgStart
@@ -107,10 +112,22 @@ handleServerPacket::
 	jr z, .err ; 2 Error
 	ret
 .err:
+	call waitVBLANK
+	reset lcdCtrl
 	ld de, VRAMBgStart
-	jp copyMemory
-	;ret
+	call copyMemory
+	reg lcdCtrl, LCD_BASE_CONTROL_BYTE
+	ret
 .tilemap:
+	inc hl
+	inc hl
+	call waitVBLANK
+	reset lcdCtrl
 	ld bc, 32 * 32
-	add hl, bc
+	ld de, VRAMBgStart
+	call fillMemory
+	ld bc, 32 * 18
+	ld de, VRAMBgStart
+	call copyMemory
+	reg lcdCtrl, LCD_MAP_CONTROL_BYTE
 	ret

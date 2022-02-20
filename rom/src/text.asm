@@ -1,4 +1,4 @@
-SECTION "Text", ROMX[$7000], BANK[1]
+SECTION "Text", ROMX[$5800], BANK[1]
 
 include "src/constants.asm"
 

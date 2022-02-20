@@ -73,9 +73,21 @@ SGB:                            ; We are on Super Gameboy
 	ei
 	jr welcomeScreen        ; Run main program
 
+monochromePal::
+	dw $7FFF, $4210, $2108, $0000
+
 ; Runs the main program
 welcomeScreen::
 	call loadTextAsset
+
+	ld de, BGPI
+	ld a, $80
+	ld [de], a
+	inc de
+
+	ld hl, monochromePal
+	ld bc, $10
+	call copyMemorySingleAddr
 
 	ld de, BGPI
 	ld a, $88

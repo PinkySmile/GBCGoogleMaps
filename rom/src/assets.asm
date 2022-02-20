@@ -1,4 +1,4 @@
-SECTION "Assets", ROMX[$7200], BANK[1]
+SECTION "Assets", ROMX[$6000], BANK[1]
 
 ; The fonts used.
 textAssets::
@@ -16,3 +16,7 @@ googleLogoLeftEnd::
 googleLogoRight::
 	incbin "assets/google_logo_right.cfx"
 googleLogoRightEnd::
+
+tilemap::
+	incbin "assets/tilemap.cfx"
+tilemapEnd::

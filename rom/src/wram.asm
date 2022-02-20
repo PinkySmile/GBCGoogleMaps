@@ -31,9 +31,9 @@ tileMap::
 
 SECTION "CDATA", SRAM[$A000]
 myCmdBuffer::
-	ds $200
+	ds $100
 cartCmdBuffer::
-	ds $1FE
+	ds $2FE
 cartIntTrigger::
 	ds $1
 myIntTrigger::
