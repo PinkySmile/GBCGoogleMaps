@@ -1,4 +1,4 @@
-ZOOM_MAX = 9
+ZOOM_MAX = 12
 
 loadTiles::
 	ld de, $9000
@@ -60,18 +60,18 @@ map::
 	call getTileMap
 	jr map
 
-.zoomIn:
-	ld hl, zoomLevel
-	ld a, ZOOM_MAX
-	cp [hl]
-	jr z, map
-	inc [hl]
-	call getTileMap
-	jr map
 .zoomOut:
 	ld hl, zoomLevel
 	xor a
 	or [hl]
+	jr z, map
+	dec [hl]
+	call getTileMap
+	jr map
+.zoomIn:
+	ld hl, zoomLevel
+	ld a, ZOOM_MAX
+	cp [hl]
 	jr z, map
 	inc [hl]
 	call getTileMap

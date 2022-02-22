@@ -43,11 +43,11 @@ getTileMap:
 	ld [hli], a
 
 	ld a, b
-	sub $30
+	;sub $30
 	ld [hli], a
 
 	ld a, c
-	sub $38
+	;sub $38
 	ld [hli], a
 
 	ld a, [zoomLevel]
@@ -90,7 +90,6 @@ handlePacket::
 	pop hl
 	pop bc
 	add hl, bc
-	ld b, b
 	jr .loop
 .err:
 	ld de, VRAMBgStart
@@ -119,8 +118,6 @@ handleServerPacket::
 	reg lcdCtrl, LCD_BASE_CONTROL_BYTE
 	ret
 .tilemap:
-	inc hl
-	inc hl
 	call waitVBLANK
 	reset lcdCtrl
 	ld bc, 32 * 32
