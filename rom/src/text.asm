@@ -25,3 +25,6 @@ changeSSIDText::
 
 networkPasswdText::
 	db "Network password:", 0
+
+searchText::
+	db "Location:  ", 0

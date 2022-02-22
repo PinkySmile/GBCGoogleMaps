@@ -58,18 +58,19 @@ main::
 	jr SGB
 
 DMG:                            ; We are on monochrome Gameboy
-	ld hl, onlyGBCtext
-	jp dispError            ; Display error message
+	reg hardwareType, $03   ; Sets the hardware type register to DMG
+	ei
+	jr welcomeScreen        ; Run main program
 
 GBC:                            ; We are on Gameboy Color
 	call setupGBCPalette    ; Setup palettes
-	reg hardwareType, $01  ; Sets the hardware type register to GBC
+	reg hardwareType, $01   ; Sets the hardware type register to GBC
 	ei
 	jr welcomeScreen        ; Run main program
 
 SGB:                            ; We are on Super Gameboy
 	call loadSGBBorder      ; Load the SGB boarder and display it
-	reg hardwareType, $02  ; Sets the hardware type register to SGB
+	reg hardwareType, $02   ; Sets the hardware type register to SGB
 	ei
 	jr welcomeScreen        ; Run main program
 
@@ -78,6 +79,7 @@ monochromePal::
 
 ; Runs the main program
 welcomeScreen::
+	reg zoomLevel, 1
 	call loadTextAsset
 
 	ld de, BGPI

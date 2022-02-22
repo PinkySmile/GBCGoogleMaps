@@ -1,4 +1,4 @@
-ZOOM_MAX = 12
+ZOOM_MAX = 20
 
 loadTiles::
 	ld de, $9000
